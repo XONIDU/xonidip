@@ -16,7 +16,7 @@ import unicodedata
 app = Flask(__name__)
 
 # Configuración
-app.config['SECRET_KEY'] = 'xoni-dip-secret-key-2023'
+app.config['SECRET_KEY'] = 'xonidu-Darian-Alberto-Camacho-Salas'
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['OUTPUT_FOLDER'] = 'diplomas_generados'
