@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XONI-DIP - Generador de Diplomas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 3.2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        header h1 i {
+            color: #f1c40f;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            margin-top: 15px;
+        }
+
+        .features {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .feature {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .steps-container {
+            display: flex;
+            background: #f8f9fa;
+            padding: 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .step-indicator {
+            flex: 1;
+            text-align: center;
+            padding: 20px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 4px solid transparent;
+        }
+
+        .step-indicator.active {
+            background: white;
+            border-bottom-color: #3498db;
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 35px;
+            height: 35px;
+            line-height: 35px;
+            background: #dee2e6;
+            color: #495057;
+            border-radius: 50%;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .step-indicator.active .step-number {
+            background: #3498db;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .step-title {
+            font-weight: 600;
+            color: #495057;
+            font-size: 1.1rem;
+        }
+
+        .step-content {
+            padding: 40px;
+            min-height: 600px;
+        }
+
+        .step-panel {
+            display: none;
+        }
+
+        .step-panel.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .step-header {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f1f3f4;
+        }
+
+        .step-header h2 {
+            color: #2c3e50;
+            font-size: 2.2rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .step-header h2 i {
+            color: #3498db;
+        }
+
+        .upload-area {
+            border: 3px dashed #3498db;
+            border-radius: 15px;
+            padding: 50px;
+            text-align: center;
+            background: #f8fafc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px 0;
+        }
+
+        .upload-area:hover {
+            background: #e3f2fd;
+            border-color: #2980b9;
+            transform: translateY(-5px);
+        }
+
+        .upload-area i {
+            font-size: 70px;
+            color: #3498db;
+            margin-bottom: 25px;
+        }
+
+        .preview-container {
+            margin: 30px 0;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border: 1px solid #e9ecef;
+        }
+
+        .preview-wrapper {
+            text-align: center;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        #templatePreviewImg, #positionPreviewImg {
+            max-width: 100%;
+            max-height: 500px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .position-info {
+            background: linear-gradient(135deg, #3498db, #2c3e50);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 25px 0;
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .position-info span {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin: 0 5px;
+        }
+
+        .position-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .position-btn {
+            padding: 15px;
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .position-btn:hover {
+            border-color: #3498db;
+        }
+
+        .position-btn.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 25px 0;
+        }
+
+        .control-group {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 12px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .range-input {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .range-input input[type="range"] {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: #dee2e6;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .range-input input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #3498db;
+            cursor: pointer;
+            border: 3px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .range-input span {
+            min-width: 60px;
+            text-align: center;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"]:focus, select:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        input[type="color"] {
+            width: 60px;
+            height: 60px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            cursor: pointer;
+            padding: 2px;
+            background: white;
+        }
+
+        .font-style-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .font-style-btn {
+            flex: 1;
+            padding: 12px;
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .font-style-btn:hover {
+            border-color: #3498db;
+        }
+
+        .font-style-btn.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        textarea {
+            width: 100%;
+            height: 250px;
+            padding: 20px;
+            border: 2px solid #dee2e6;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1.1rem;
+            resize: vertical;
+            line-height: 1.6;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        .names-info {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 25px 0;
+            text-align: center;
+            display: none;
+        }
+
+        .names-info.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn i {
+            font-size: 1.2rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(46, 204, 113, 0.4);
+        }
+
+        .btn-large {
+            padding: 20px 40px;
+            font-size: 1.3rem;
+            min-width: 200px;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #f1f3f4;
+        }
+
+        .progress-container {
+            margin: 40px 0;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            display: none;
+        }
+
+        .progress-container.active {
+            display: block;
+        }
+
+        .progress-bar {
+            height: 25px;
+            background: #ecf0f1;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 12px;
+            position: relative;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .result-container {
+            text-align: center;
+            padding: 50px;
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            border-radius: 20px;
+            margin: 40px 0;
+            display: none;
+        }
+
+        .result-container.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .result-container i {
+            font-size: 100px;
+            color: #28a745;
+            margin-bottom: 30px;
+            animation: bounce 1s infinite alternate;
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-20px); }
+        }
+
+        .alert {
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            display: none;
+            border-left: 5px solid transparent;
+        }
+
+        .alert.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-left-color: #28a745;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left-color: #dc3545;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border-left-color: #ffc107;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #6c757d;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .tips {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 0.9rem;
+            color: #1565c0;
+        }
+
+        .tips i {
+            color: #3498db;
+            margin-right: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            header {
+                padding: 30px 20px;
+            }
+            
+            header h1 {
+                font-size: 2.2rem;
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .steps-container {
+                flex-direction: column;
+            }
+            
+            .step-indicator {
+                border-bottom: none;
+                border-right: 4px solid transparent;
+            }
+            
+            .step-indicator.active {
+                border-right-color: #3498db;
+                border-bottom: none;
+            }
+            
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .position-controls {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-certificate"></i> XONI-DIP</h1>
+            <p class="subtitle">Generador Masivo de Diplomas con Soporte de Tildes</p>
+            <div class="features">
+                <div class="feature"><i class="fas fa-check"></i> Tildes y caracteres especiales</div>
+                <div class="feature"><i class="fas fa-check"></i> Fuentes con estilos</div>
+                <div class="feature"><i class="fas fa-check"></i> Posicionamiento preciso</div>
+                <div class="feature"><i class="fas fa-check"></i> Vista previa en tiempo real</div>
+            </div>
+        </header>
+        
+        <div class="steps-container">
+            <div class="step-indicator active" id="step1-indicator" onclick="goToStep(1)">
+                <div class="step-number">1</div>
+                <div class="step-title">Plantilla</div>
+            </div>
+            <div class="step-indicator" id="step2-indicator" onclick="goToStep(2)">
+                <div class="step-number">2</div>
+                <div class="step-title">Posición y Texto</div>
+            </div>
+            <div class="step-indicator" id="step3-indicator" onclick="goToStep(3)">
+                <div class="step-number">3</div>
+                <div class="step-title">Nombres</div>
+            </div>
+            <div class="step-indicator" id="step4-indicator" onclick="goToStep(4)">
+                <div class="step-number">4</div>
+                <div class="step-title">Generar</div>
+            </div>
+        </div>
+        
+        <div class="step-content">
+            <!-- Paso 1: Subir plantilla -->
+            <div class="step-panel active" id="step1">
+                <div class="step-header">
+                    <h2><i class="fas fa-file-upload"></i> Subir Plantilla</h2>
+                    <p>Sube la plantilla de tu diploma en formato JPG o PNG</p>
+                </div>
+                
+                <div class="alert" id="alert1"></div>
+                
+                <div class="upload-area" id="templateUploadArea">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <h3>Haz clic para seleccionar tu plantilla</h3>
+                    <p>Formatos aceptados: JPG, PNG (Recomendado: 2000x1500px)</p>
+                    <input type="file" id="templateFile" accept=".jpg,.jpeg,.png" style="display: none;">
+                </div>
+                
+                <div class="preview-container" id="templatePreview" style="display: none;">
+                    <h3><i class="fas fa-eye"></i> Vista Previa de la Plantilla</h3>
+                    <div class="preview-wrapper">
+                        <img id="templatePreviewImg" src="" alt="Plantilla del diploma">
+                    </div>
+                    <div style="text-align: center; margin-top: 25px;">
+                        <button class="btn btn-secondary" onclick="changeTemplate()">
+                            <i class="fas fa-redo"></i> Cambiar Plantilla
+                        </button>
+                        <button class="btn btn-primary" onclick="goToStep(2)">
+                            Continuar <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="tips">
+                    <i class="fas fa-lightbulb"></i> 
+                    <strong>Tip:</strong> Usa una plantilla de alta calidad para mejores resultados. 
+                    El texto se superpondrá sobre la imagen.
+                </div>
+            </div>
+            
+            <!-- Paso 2: Configurar posición -->
+            <div class="step-panel" id="step2">
+                <div class="step-header">
+                    <h2><i class="fas fa-crosshairs"></i> Configurar Posición y Texto</h2>
+                    <p>Define exactamente dónde y cómo aparecerá el nombre en el diploma</p>
+                </div>
+                
+                <div class="alert" id="alert2"></div>
+                
+                <div class="preview-container">
+                    <h3><i class="fas fa-image"></i> Vista Previa en Tiempo Real</h3>
+                    <div class="preview-wrapper">
+                        <img id="positionPreviewImg" src="" alt="Vista previa de posición">
+                    </div>
+                    <div class="position-info">
+                        <i class="fas fa-map-marker-alt"></i> Posición Actual: 
+                        X: <span id="posX">100</span>px, Y: <span id="posY">100</span>px
+                    </div>
+                </div>
+                
+                <div class="preview-container">
+                    <h3><i class="fas fa-bullseye"></i> Posiciones Predefinidas</h3>
+                    <div class="position-controls">
+                        <button class="position-btn" onclick="setPosition('center_xy')">
+                            <i class="fas fa-crosshairs"></i> Centro Completo
+                        </button>
+                        <button class="position-btn" onclick="setPosition('center_x')">
+                            <i class="fas fa-arrows-alt-h"></i> Centro Horizontal
+                        </button>
+                        <button class="position-btn" onclick="setPosition('top_center')">
+                            <i class="fas fa-arrow-up"></i> Superior Centrado
+                        </button>
+                        <button class="position-btn" onclick="setPosition('bottom_center')">
+                            <i class="fas fa-arrow-down"></i> Inferior Centrado
+                        </button>
+                        <button class="position-btn active" onclick="setPosition('manual')">
+                            <i class="fas fa-mouse-pointer"></i> Manual
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="preview-container">
+                    <h3><i class="fas fa-sliders-h"></i> Configuración Manual</h3>
+                    
+                    <div class="controls-grid">
+                        <div class="control-group">
+                            <label><i class="fas fa-arrows-alt-h"></i> Posición Horizontal (X)</label>
+                            <div class="range-input">
+                                <input type="range" id="positionX" min="0" max="2000" value="100" step="1">
+                                <span id="positionXValue">100 px</span>
+                            </div>
+                            <input type="number" id="positionXInput" min="0" max="5000" value="100" 
+                                   style="width: 100%; margin-top: 10px;">
+                        </div>
+                        
+                        <div class="control-group">
+                            <label><i class="fas fa-arrows-alt-v"></i> Posición Vertical (Y)</label>
+                            <div class="range-input">
+                                <input type="range" id="positionY" min="0" max="2000" value="100" step="1">
+                                <span id="positionYValue">100 px</span>
+                            </div>
+                            <input type="number" id="positionYInput" min="0" max="5000" value="100" 
+                                   style="width: 100%; margin-top: 10px;">
+                        </div>
+                    </div>
+                    
+                    <div class="controls-grid">
+                        <div class="control-group">
+                            <label><i class="fas fa-text-height"></i> Tamaño de Fuente</label>
+                            <div class="range-input">
+                                <input type="range" id="fontSize" min="10" max="200" value="40" step="1">
+                                <span id="fontSizeValue">40 px</span>
+                            </div>
+                            <input type="number" id="fontSizeInput" min="10" max="300" value="40" 
+                                   style="width: 100%; margin-top: 10px;">
+                            <div class="tips" style="margin-top: 10px;">
+                                <i class="fas fa-info-circle"></i> Recomendado: 40-60px para nombres
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label><i class="fas fa-palette"></i> Color del Texto</label>
+                            <input type="color" id="fontColor" value="#000000">
+                            <div style="margin-top: 15px;">
+                                <label><i class="fas fa-font"></i> Estilo de Fuente</label>
+                                <div class="font-style-controls">
+                                    <button class="font-style-btn active" onclick="setFontStyle('normal')">Normal</button>
+                                    <button class="font-style-btn" onclick="setFontStyle('bold')">Negrita</button>
+                                    <button class="font-style-btn" onclick="setFontStyle('italic')">Cursiva</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label><i class="fas fa-font"></i> Tipo de Fuente</label>
+                            <select id="fontSelect">
+                                <option value="arial.ttf">Arial</option>
+                                <option value="arialbd.ttf">Arial Negrita</option>
+                                <option value="times.ttf">Times New Roman</option>
+                                <option value="timesbd.ttf">Times New Roman Negrita</option>
+                                <option value="cour.ttf">Courier New</option>
+                                <option value="courbd.ttf">Courier New Negrita</option>
+                            </select>
+                            <div class="tips" style="margin-top: 15px;">
+                                <i class="fas fa-check"></i> Tildes soportadas: á, é, í, ó, ú, ñ, Á, É, Í, Ó, Ú, Ñ
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 25px;">
+                        <button class="btn btn-primary" onclick="updatePositionPreview()">
+                            <i class="fas fa-sync-alt"></i> Actualizar Vista Previa
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="navigation">
+                    <button class="btn btn-secondary" onclick="goToStep(1)">
+                        <i class="fas fa-arrow-left"></i> Volver
+                    </button>
+                    <button class="btn btn-primary" onclick="goToStep(3)">
+                        Continuar <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Paso 3: Ingresar nombres -->
+            <div class="step-panel" id="step3">
+                <div class="step-header">
+                    <h2><i class="fas fa-users"></i> Ingresar Nombres</h2>
+                    <p>Introduce los nombres que aparecerán en los diplomas (usa tildes libremente)</p>
+                </div>
+                
+                <div class="alert" id="alert3"></div>
+                
+                <div class="tips">
+                    <i class="fas fa-info-circle"></i> 
+                    <strong>Importante:</strong> Los nombres con tildes se mostrarán correctamente en los diplomas.
+                    Ejemplos: José María, Ana Sofía, Nicolás, María Fernanda
+                </div>
+                
+                <div style="margin: 25px 0;">
+                    <textarea id="namesText" placeholder="Escribe un nombre por línea. Ejemplo con tildes:
+José Antonio Pérez González
+María Fernanda García López
+Carlos Andrés Rodríguez Martínez
+Ana Sofía Fernández Sánchez
+Pedro Nicolás Martínez Díaz
+Laura Isabel Sánchez Pérez
+Miguel Ángel López González
+Isabel Cristina González Rodríguez
+David Alejandro Hernández Martín
+Carmen Elena Díaz Fernández"></textarea>
+                </div>
+                
+                <div style="text-align: center;">
+                    <button class="btn btn-primary" onclick="processNames()">
+                        <i class="fas fa-check"></i> Procesar Nombres
+                    </button>
+                </div>
+                
+                <div class="names-info" id="namesSummary">
+                    <h3><i class="fas fa-check-circle"></i> ¡Nombres listos!</h3>
+                    <p>Se han procesado <strong id="namesCount">0</strong> nombres correctamente.</p>
+                    <p style="margin-top: 10px; font-size: 1.1rem;">
+                        <i class="fas fa-lightbulb"></i> Ejemplos: <span id="sampleNames"></span>
+                    </p>
+                </div>
+                
+                <div class="navigation">
+                    <button class="btn btn-secondary" onclick="goToStep(2)">
+                        <i class="fas fa-arrow-left"></i> Volver
+                    </button>
+                    <button class="btn btn-primary" onclick="goToStep(4)">
+                        Continuar <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Paso 4: Generar diplomas -->
+            <div class="step-panel" id="step4">
+                <div class="step-header">
+                    <h2><i class="fas fa-rocket"></i> Generar Diplomas</h2>
+                    <p>Genera y descarga todos los diplomas en un archivo ZIP</p>
+                </div>
+                
+                <div class="alert" id="alert4"></div>
+                
+                <div style="text-align: center; margin: 40px 0;">
+                    <button class="btn btn-success btn-large" onclick="generateDiplomas()">
+                        <i class="fas fa-play"></i> GENERAR DIPLOMAS
+                    </button>
+                    <p style="margin-top: 15px; color: #666; font-size: 1.1rem;">
+                        <i class="fas fa-info-circle"></i> Se creará un archivo ZIP con todos los diplomas generados
+                    </p>
+                </div>
+                
+                <div class="progress-container" id="progressContainer">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">Preparando generación...</div>
+                </div>
+                
+                <div class="result-container" id="resultContainer">
+                    <i class="fas fa-check-circle"></i>
+                    <h3>¡Diplomas Generados con Éxito!</h3>
+                    <p id="resultCount" style="font-size: 1.3rem; margin: 15px 0;">0 diplomas generados</p>
+                    <div style="margin-top: 30px;">
+                        <a class="btn btn-primary btn-large" id="downloadBtn" href="#" target="_blank">
+                            <i class="fas fa-download"></i> DESCARGAR ARCHIVO ZIP
+                        </a>
+                        <button class="btn btn-secondary" onclick="restartProcess()" style="margin-top: 15px;">
+                            <i class="fas fa-redo"></i> Generar Más Diplomas
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="navigation">
+                    <button class="btn btn-secondary" onclick="goToStep(3)">
+                        <i class="fas fa-arrow-left"></i> Volver
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p><strong>XONI-DIP v3.0</strong> - Generador Masivo de Diplomas con Soporte Completo de Tildes</p>
+            <p>© 2024 - Sistema optimizado para nombres en español</p>
+        </footer>
+    </div>
+    
+    <script>
+        // Variables globales
+        let currentStep = 1;
+        let templateData = null;
+        let textConfig = {
+            x: 100,
+            y: 100,
+            font_size: 40,
+            font_color: '#000000',
+            font_name: 'arial.ttf',
+            font_style: 'normal',
+            align_type: 'manual'
+        };
+        let names = [];
+        
+        // Inicializar cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            initApp();
+        });
+        
+        function initApp() {
+            // Configurar eventos
+            const templateFile = document.getElementById('templateFile');
+            templateFile.addEventListener('change', handleTemplateUpload);
+            
+            document.getElementById('templateUploadArea').addEventListener('click', function() {
+                templateFile.click();
+            });
+            
+            // Configurar controles de posición
+            const positionX = document.getElementById('positionX');
+            const positionXInput = document.getElementById('positionXInput');
+            const positionY = document.getElementById('positionY');
+            const positionYInput = document.getElementById('positionYInput');
+            const fontSize = document.getElementById('fontSize');
+            const fontSizeInput = document.getElementById('fontSizeInput');
+            
+            positionX.addEventListener('input', function() {
+                const value = parseInt(this.value);
+                textConfig.x = value;
+                positionXInput.value = value;
+                document.getElementById('positionXValue').textContent = value + ' px';
+                updatePositionPreview();
+            });
+            
+            positionXInput.addEventListener('input', function() {
+                const value = parseInt(this.value) || 0;
+                textConfig.x = value;
+                positionX.value = value;
+                document.getElementById('positionXValue').textContent = value + ' px';
+                updatePositionPreview();
+            });
+            
+            positionY.addEventListener('input', function() {
+                const value = parseInt(this.value);
+                textConfig.y = value;
+                positionYInput.value = value;
+                document.getElementById('positionYValue').textContent = value + ' px';
+                updatePositionPreview();
+            });
+            
+            positionYInput.addEventListener('input', function() {
+                const value = parseInt(this.value) || 0;
+                textConfig.y = value;
+                positionY.value = value;
+                document.getElementById('positionYValue').textContent = value + ' px';
+                updatePositionPreview();
+            });
+            
+            fontSize.addEventListener('input', function() {
+                const value = parseInt(this.value);
+                textConfig.font_size = value;
+                fontSizeInput.value = value;
+                document.getElementById('fontSizeValue').textContent = value + ' px';
+                updatePositionPreview();
+            });
+            
+            fontSizeInput.addEventListener('input', function() {
+                const value = parseInt(this.value) || 40;
+                textConfig.font_size = value;
+                fontSize.value = value;
+                document.getElementById('fontSizeValue').textContent = value + ' px';
+                updatePositionPreview();
+            });
+            
+            // Configurar color de fuente
+            document.getElementById('fontColor').addEventListener('change', function() {
+                textConfig.font_color = this.value;
+                updatePositionPreview();
+            });
+            
+            // Configurar selector de fuente
+            document.getElementById('fontSelect').addEventListener('change', function() {
+                textConfig.font_name = this.value;
+                updatePositionPreview();
+            });
+            
+            // Nombres de ejemplo con tildes
+            document.getElementById('namesText').value = `José Antonio Pérez González
+María Fernanda García López
+Carlos Andrés Rodríguez Martínez
+Ana Sofía Fernández Sánchez
+Pedro Nicolás Martínez Díaz
+Laura Isabel Sánchez Pérez
+Miguel Ángel López González
+Isabel Cristina González Rodríguez
+David Alejandro Hernández Martín
+Carmen Elena Díaz Fernández`;
+        }
+        
+        // Manejar subida de plantilla
+        async function handleTemplateUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const uploadArea = document.getElementById('templateUploadArea');
+            const preview = document.getElementById('templatePreview');
+            const alert = document.getElementById('alert1');
+            
+            uploadArea.innerHTML = `
+                <div style="text-align: center;">
+                    <i class="fas fa-spinner fa-spin fa-3x" style="color: #3498db;"></i>
+                    <h3 style="margin-top: 20px;">Subiendo plantilla...</h3>
+                    <p>Por favor espera unos segundos</p>
+                </div>
+            `;
+            
+            showAlert(alert, 'Subiendo plantilla, por favor espera...', 'warning');
+            
+            const formData = new FormData();
+            formData.append('template', file);
+            
+            try {
+                const response = await fetch('/upload-template', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    templateData = data;
+                    
+                    // Mostrar vista previa
+                    const img = document.getElementById('templatePreviewImg');
+                    img.src = data.url || `/uploads/${data.preview_filename}`;
+                    
+                    // Configurar posición inicial en el centro
+                    if (data.dimensions) {
+                        textConfig.x = Math.floor(data.dimensions.width / 2);
+                        textConfig.y = Math.floor(data.dimensions.height / 2);
+                        
+                        // Actualizar controles
+                        document.getElementById('positionX').value = textConfig.x;
+                        document.getElementById('positionXInput').value = textConfig.x;
+                        document.getElementById('positionXValue').textContent = textConfig.x + ' px';
+                        document.getElementById('positionX').max = Math.min(data.dimensions.width, 3000);
+                        document.getElementById('positionXInput').max = Math.min(data.dimensions.width, 3000);
+                        
+                        document.getElementById('positionY').value = textConfig.y;
+                        document.getElementById('positionYInput').value = textConfig.y;
+                        document.getElementById('positionYValue').textContent = textConfig.y + ' px';
+                        document.getElementById('positionY').max = Math.min(data.dimensions.height, 3000);
+                        document.getElementById('positionYInput').max = Math.min(data.dimensions.height, 3000);
+                    }
+                    
+                    uploadArea.style.display = 'none';
+                    preview.style.display = 'block';
+                    
+                    showAlert(alert, '✅ Plantilla cargada correctamente', 'success');
+                    
+                    // Actualizar vista previa de posición
+                    setTimeout(() => {
+                        updatePositionPreview();
+                    }, 500);
+                    
+                } else {
+                    throw new Error(data.error || 'Error al cargar la plantilla');
+                }
+            } catch (error) {
+                uploadArea.innerHTML = `
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <h3>Haz clic para seleccionar tu plantilla</h3>
+                    <p>Formatos aceptados: JPG, PNG (Recomendado: 2000x1500px)</p>
+                `;
+                uploadArea.style.display = 'block';
+                showAlert(alert, `❌ ${error.message}`, 'error');
+            }
+        }
+        
+        // Cambiar plantilla
+        function changeTemplate() {
+            document.getElementById('templateUploadArea').style.display = 'block';
+            document.getElementById('templatePreview').style.display = 'none';
+            document.getElementById('templateFile').value = '';
+            templateData = null;
+        }
+        
+        // Establecer posición predefinida
+        function setPosition(type) {
+            textConfig.align_type = type;
+            
+            // Actualizar botones activos
+            document.querySelectorAll('.position-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            if (!templateData) return;
+            
+            updatePositionPreview();
+        }
+        
+        // Establecer estilo de fuente
+        function setFontStyle(style) {
+            textConfig.font_style = style;
+            
+            // Actualizar botones activos
+            document.querySelectorAll('.font-style-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            updatePositionPreview();
+        }
+        
+        // Actualizar vista previa de posición
+        async function updatePositionPreview() {
+            if (!templateData) return;
+            
+            const previewImg = document.getElementById('positionPreviewImg');
+            const posX = document.getElementById('posX');
+            const posY = document.getElementById('posY');
+            
+            // Mostrar cargando
+            previewImg.style.opacity = '0.5';
+            
+            try {
+                const response = await fetch('/preview-position', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        template_path: templateData.filepath,
+                        text_config: {
+                            ...textConfig,
+                            sample_text: 'José María Rodríguez'
+                        }
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    previewImg.src = data.preview;
+                    previewImg.style.opacity = '1';
+                    
+                    // Actualizar coordenadas
+                    posX.textContent = data.position.x;
+                    posY.textContent = data.position.y;
+                    
+                } else {
+                    showAlert(document.getElementById('alert2'), `Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showAlert(document.getElementById('alert2'), `Error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Procesar nombres
+        function processNames() {
+            const text = document.getElementById('namesText').value.trim();
+            const alert = document.getElementById('alert3');
+            const summary = document.getElementById('namesSummary');
+            
+            if (!text) {
+                showAlert(alert, '❌ Por favor ingresa al menos un nombre', 'error');
+                return;
+            }
+            
+            // Procesar texto (manteniendo tildes)
+            names = text.split('\n')
+                .map(name => name.trim())
+                .filter(name => name.length > 0);
+            
+            if (names.length === 0) {
+                showAlert(alert, '❌ No se encontraron nombres válidos', 'error');
+                return;
+            }
+            
+            // Eliminar duplicados manteniendo tildes
+            names = [...new Set(names)];
+            
+            document.getElementById('namesCount').textContent = names.length;
+            
+            // Mostrar ejemplos
+            const sampleNames = names.slice(0, 3);
+            document.getElementById('sampleNames').textContent = sampleNames.join(', ') + (names.length > 3 ? '...' : '');
+            
+            summary.classList.add('show');
+            
+            showAlert(alert, `✅ ${names.length} nombres procesados correctamente (tildes incluidas)`, 'success');
+        }
+        
+        // Navegación entre pasos
+        function goToStep(step) {
+            // Validaciones
+            if (step === 2 && !templateData) {
+                showAlert(document.getElementById('alert1'), '❌ Primero debes subir una plantilla', 'error');
+                return;
+            }
+            
+            if (step === 3 && !templateData) {
+                showAlert(document.getElementById('alert2'), '❌ Configura primero la posición del texto', 'error');
+                return;
+            }
+            
+            if (step === 4 && names.length === 0) {
+                showAlert(document.getElementById('alert3'), '❌ Primero debes ingresar los nombres', 'error');
+                return;
+            }
+            
+            // Actualizar indicadores
+            document.querySelectorAll('.step-indicator').forEach(indicator => {
+                indicator.classList.remove('active');
+            });
+            document.getElementById(`step${step}-indicator`).classList.add('active');
+            
+            // Ocultar todos los paneles
+            document.querySelectorAll('.step-panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+            
+            // Mostrar panel actual
+            document.getElementById(`step${step}`).classList.add('active');
+            
+            currentStep = step;
+            
+            // Acciones específicas por paso
+            if (step === 2 && templateData) {
+                updatePositionPreview();
+            }
+        }
+        
+        // Generar diplomas
+        async function generateDiplomas() {
+            if (names.length === 0 || !templateData) {
+                showAlert(document.getElementById('alert4'), '❌ Completa todos los pasos primero', 'error');
+                return;
+            }
+            
+            const progressContainer = document.getElementById('progressContainer');
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            const resultContainer = document.getElementById('resultContainer');
+            const alert = document.getElementById('alert4');
+            
+            // Mostrar progreso
+            progressContainer.classList.add('active');
+            progressFill.style.width = '0%';
+            progressText.textContent = 'Preparando generación...';
+            
+            // Ocultar resultado anterior
+            resultContainer.classList.remove('active');
+            
+            try {
+                // Simular progreso inicial
+                let progress = 0;
+                const progressInterval = setInterval(() => {
+                    progress += 2;
+                    if (progress <= 80) {
+                        progressFill.style.width = `${progress}%`;
+                        progressText.textContent = `Procesando... ${progress}%`;
+                    }
+                }, 100);
+                
+                // Enviar datos al servidor
+                const response = await fetch('/generate-diplomas', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        template_path: templateData.filepath,
+                        names: names,
+                        text_config: textConfig
+                    })
+                });
+                
+                clearInterval(progressInterval);
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Mostrar progreso final
+                    let finalProgress = 80;
+                    const finalInterval = setInterval(() => {
+                        finalProgress += 4;
+                        if (finalProgress >= 100) {
+                            clearInterval(finalInterval);
+                            progressFill.style.width = '100%';
+                            progressText.textContent = '¡Completado!';
+                            
+                            // Mostrar resultado
+                            setTimeout(() => {
+                                progressContainer.classList.remove('active');
+                                
+                                document.getElementById('resultCount').textContent = 
+                                    `${data.count} diplomas generados con tildes incluidas`;
+                                
+                                const downloadBtn = document.getElementById('downloadBtn');
+                                downloadBtn.href = data.download_url;
+                                downloadBtn.download = data.zip_file;
+                                
+                                resultContainer.classList.add('active');
+                                
+                                showAlert(alert, '✅ Diplomas generados exitosamente (tildes incluidas)', 'success');
+                                
+                            }, 1000);
+                        } else {
+                            progressFill.style.width = `${finalProgress}%`;
+                            progressText.textContent = `Finalizando... ${finalProgress}%`;
+                        }
+                    }, 50);
+                    
+                } else {
+                    throw new Error(data.error || 'Error al generar diplomas');
+                }
+                
+            } catch (error) {
+                progressContainer.classList.remove('active');
+                showAlert(alert, `❌ ${error.message}`, 'error');
+            }
+        }
+        
+        // Reiniciar proceso
+        function restartProcess() {
+            templateData = null;
+            names = [];
+            
+            // Resetear UI
+            document.getElementById('resultContainer').classList.remove('active');
+            document.getElementById('templatePreview').style.display = 'none';
+            document.getElementById('templateUploadArea').style.display = 'block';
+            document.getElementById('templateUploadArea').innerHTML = `
+                <i class="fas fa-cloud-upload-alt"></i>
+                <h3>Haz clic para seleccionar tu plantilla</h3>
+                <p>Formatos aceptados: JPG, PNG (Recomendado: 2000x1500px)</p>
+            `;
+            document.getElementById('templateFile').value = '';
+            document.getElementById('namesSummary').classList.remove('show');
+            document.getElementById('namesText').value = '';
+            
+            // Resetear configuraciones
+            textConfig = {
+                x: 100,
+                y: 100,
+                font_size: 40,
+                font_color: '#000000',
+                font_name: 'arial.ttf',
+                font_style: 'normal',
+                align_type: 'manual'
+            };
+            
+            // Resetear controles
+            document.getElementById('positionX').value = 100;
+            document.getElementById('positionXInput').value = 100;
+            document.getElementById('positionXValue').textContent = '100 px';
+            document.getElementById('positionY').value = 100;
+            document.getElementById('positionYInput').value = 100;
+            document.getElementById('positionYValue').textContent = '100 px';
+            document.getElementById('fontSize').value = 40;
+            document.getElementById('fontSizeInput').value = 40;
+            document.getElementById('fontSizeValue').textContent = '40 px';
+            document.getElementById('fontColor').value = '#000000';
+            document.getElementById('fontSelect').value = 'arial.ttf';
+            
+            // Resetear botones de estilo
+            document.querySelectorAll('.font-style-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelectorAll('.font-style-btn')[0].classList.add('active');
+            
+            // Resetear pasos
+            document.querySelectorAll('.step-indicator').forEach(indicator => {
+                indicator.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.step-panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+            
+            // Volver al paso 1
+            document.getElementById('step1').classList.add('active');
+            document.getElementById('step1-indicator').classList.add('active');
+            currentStep = 1;
+        }
+        
+        // Mostrar alerta
+        function showAlert(element, message, type) {
+            element.innerHTML = message;
+            element.className = `alert alert-${type} show`;
+            
+            // Auto-ocultar
+            setTimeout(() => {
+                element.classList.remove('show');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
