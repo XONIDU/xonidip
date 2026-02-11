@@ -793,12 +793,13 @@
                         <div class="control-group">
                             <label><i class="fas fa-font"></i> Tipo de Fuente</label>
                             <select id="fontSelect">
-                                <option value="arial.ttf">Arial</option>
-                                <option value="arialbd.ttf">Arial Negrita</option>
-                                <option value="times.ttf">Times New Roman</option>
-                                <option value="timesbd.ttf">Times New Roman Negrita</option>
-                                <option value="cour.ttf">Courier New</option>
-                                <option value="courbd.ttf">Courier New Negrita</option>
+                                <option value="arial.ttf">Arial Normal</option>
+                                <option value="arial.ttf" data-style="bold">Arial Negrita</option>
+                                <option value="arial.ttf" data-style="italic">Arial Cursiva</option>
+                                <option value="times.ttf">Times New Roman Normal</option>
+                                <option value="times.ttf" data-style="bold">Times New Roman Negrita</option>
+                                <option value="cour.ttf">Courier New Normal</option>
+                                <option value="cour.ttf" data-style="bold">Courier New Negrita</option>
                             </select>
                             <div class="tips" style="margin-top: 15px;">
                                 <i class="fas fa-check"></i> Tildes soportadas: á, é, í, ó, ú, ñ, Á, É, Í, Ó, Ú, Ñ
@@ -1022,7 +1023,25 @@ Carmen Elena Díaz Fernández"></textarea>
             
             // Configurar selector de fuente
             document.getElementById('fontSelect').addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
                 textConfig.font_name = this.value;
+                
+                // Actualizar estilo si la opción tiene data-style
+                if (selectedOption.dataset.style) {
+                    textConfig.font_style = selectedOption.dataset.style;
+                    
+                    // Actualizar botones de estilo
+                    document.querySelectorAll('.font-style-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    
+                    // Activar el botón correspondiente
+                    const styleBtn = document.querySelector(`.font-style-btn[onclick*="${textConfig.font_style}"]`);
+                    if (styleBtn) {
+                        styleBtn.classList.add('active');
+                    }
+                }
+                
                 updatePositionPreview();
             });
             
@@ -1412,6 +1431,12 @@ Carmen Elena Díaz Fernández`;
                 btn.classList.remove('active');
             });
             document.querySelectorAll('.font-style-btn')[0].classList.add('active');
+            
+            // Resetear botones de posición
+            document.querySelectorAll('.position-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelectorAll('.position-btn')[4].classList.add('active');
             
             // Resetear pasos
             document.querySelectorAll('.step-indicator').forEach(indicator => {
