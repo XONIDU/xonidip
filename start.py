@@ -20,10 +20,11 @@ app.config['SECRET_KEY'] = 'xonidu-Darian-Alberto-Camacho-Salas'
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['OUTPUT_FOLDER'] = 'diplomas_generados'
+app.config['FONTS_FOLDER'] = 'fonts'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'txt', 'csv', 'xlsx', 'xls'}
 
 # Crear carpetas si no existen
-for folder in [app.config['UPLOAD_FOLDER'], app.config['OUTPUT_FOLDER']]:
+for folder in [app.config['UPLOAD_FOLDER'], app.config['OUTPUT_FOLDER'], app.config['FONTS_FOLDER']]:
     if not os.path.exists(folder):
         os.makedirs(folder)
 
@@ -90,50 +91,116 @@ def get_text_dimensions(text, font, draw):
         # Estimación aproximada
         return len(text) * font.size // 2, font.size
 
-def get_font_path(font_name):
-    """Obtiene la ruta completa de una fuente"""
+def get_font_path(font_name, style='normal'):
+    """Obtiene la ruta completa de una fuente con estilo"""
+    # Mapeo de nombres de fuentes a archivos reales
+    font_mappings = {
+        'arial.ttf': {
+            'normal': ['arial.ttf', 'arial.ttf', 'Arial.ttf', 'arial.ttf'],
+            'bold': ['arialbd.ttf', 'arialb.ttf', 'Arial-Bold.ttf', 'arialbd.ttf'],
+            'italic': ['ariali.ttf', 'ariali.ttf', 'Arial-Italic.ttf', 'ariali.ttf']
+        },
+        'times.ttf': {
+            'normal': ['times.ttf', 'times.ttf', 'TimesNewRoman.ttf', 'times.ttf'],
+            'bold': ['timesbd.ttf', 'timesb.ttf', 'TimesNewRomanBold.ttf', 'timesbd.ttf']
+        },
+        'cour.ttf': {
+            'normal': ['cour.ttf', 'cour.ttf', 'CourierNew.ttf', 'cour.ttf'],
+            'bold': ['courbd.ttf', 'courb.ttf', 'CourierNewBold.ttf', 'courbd.ttf']
+        },
+        'verdana.ttf': {
+            'normal': ['verdana.ttf', 'verdana.ttf', 'Verdana.ttf', 'verdana.ttf']
+        },
+        'georgia.ttf': {
+            'normal': ['georgia.ttf', 'georgia.ttf', 'Georgia.ttf', 'georgia.ttf']
+        }
+    }
+    
+    # Rutas donde buscar fuentes (en orden de prioridad)
     font_paths = [
-        "fonts/",  # Carpeta local
-        "/usr/share/fonts/truetype/liberation/",
-        "/usr/share/fonts/truetype/dejavu/",
+        app.config['FONTS_FOLDER'],  # Carpeta local fonts/
+        os.path.join(os.path.dirname(__file__), 'fonts'),  # Ruta absoluta
+        "fonts/",
+        "/usr/share/fonts/",
+        "/usr/local/share/fonts/",
         "/System/Library/Fonts/",
+        "/Library/Fonts/",
         "C:\\Windows\\Fonts\\",
         "C:/Windows/Fonts/"
     ]
     
-    # Primero verificar en carpeta fonts/
-    local_font = os.path.join("fonts", font_name)
-    if os.path.exists(local_font):
-        return local_font
+    # Verificar si es una fuente conocida
+    base_name = font_name.lower()
+    if base_name in font_mappings and style in font_mappings[base_name]:
+        font_variants = font_mappings[base_name][style]
+    else:
+        # Si no es una fuente conocida, usar el nombre directamente
+        font_variants = [font_name]
     
-    # Buscar en rutas comunes
+    # Buscar en todas las rutas
     for path in font_paths:
-        font_path = os.path.join(path, font_name)
-        if os.path.exists(font_path):
-            return font_path
+        if not os.path.exists(path):
+            continue
+            
+        for variant in font_variants:
+            font_path = os.path.join(path, variant)
+            if os.path.exists(font_path):
+                print(f"✓ Encontrada fuente: {font_path}")
+                return font_path
     
-    # Si no se encuentra, usar fuente por defecto
+    # Si no se encuentra, usar fuente por defecto del sistema
     return None
 
-def load_font(font_name, font_size):
-    """Carga una fuente con manejo de errores"""
+def create_fallback_font(font_size):
+    """Crea una fuente por defecto si no hay fuentes disponibles"""
     try:
-        font_path = get_font_path(font_name)
-        if font_path:
-            return ImageFont.truetype(font_path, font_size)
-        else:
-            # Intentar cargar directamente
-            return ImageFont.truetype(font_name, font_size)
+        # Intentar cargar cualquier fuente disponible
+        for path in ['/System/Library/Fonts/Helvetica.ttc', 
+                    '/System/Library/Fonts/Helvetica.dfont',
+                    'C:\\Windows\\Fonts\\arial.ttf']:
+            if os.path.exists(path):
+                return ImageFont.truetype(path, font_size)
     except:
-        # Usar fuentes incluidas en el sistema
-        try:
-            return ImageFont.truetype("arial.ttf", font_size)
-        except:
-            try:
-                return ImageFont.truetype("DejaVuSans.ttf", font_size)
-            except:
-                # Fuente por defecto
-                return ImageFont.load_default()
+        pass
+    
+    # Si no hay fuentes, usar la por defecto de PIL
+    try:
+        return ImageFont.load_default().font_variant(size=font_size)
+    except:
+        # Último recurso: crear una fuente simple
+        return ImageFont.load_default()
+
+def load_font(font_name, font_size, font_style='normal'):
+    """Carga una fuente con estilo con manejo de errores mejorado"""
+    try:
+        # Primero intentar cargar con estilo específico
+        font_path = get_font_path(font_name, font_style)
+        
+        if font_path and os.path.exists(font_path):
+            return ImageFont.truetype(font_path, font_size)
+        
+        # Si no se encuentra con estilo, buscar la fuente base
+        font_path = get_font_path(font_name, 'normal')
+        if font_path and os.path.exists(font_path):
+            font = ImageFont.truetype(font_path, font_size)
+            
+            # Simular estilos si es necesario
+            if font_style == 'bold':
+                # Para simular negrita, aumentamos ligeramente el tamaño
+                return ImageFont.truetype(font_path, int(font_size * 1.1))
+            elif font_style == 'italic':
+                # Para cursiva no podemos hacer mucho sin la fuente real
+                return font
+            
+            return font
+        
+        # Si no se encuentra ninguna fuente, usar fallback
+        print(f"⚠ No se encontró la fuente {font_name}. Usando fuente por defecto.")
+        return create_fallback_font(font_size)
+        
+    except Exception as e:
+        print(f"⚠ Error cargando fuente {font_name}: {e}")
+        return create_fallback_font(font_size)
 
 @app.route('/')
 def index():
@@ -265,22 +332,8 @@ def preview_position():
             img_width, img_height = img.size
             
             # Cargar fuente con estilo
-            font = load_font(font_name, font_size)
-            
-            # Aplicar estilo si es posible
-            if font_style == 'bold' and hasattr(font, 'font_variant'):
-                try:
-                    # Intentar cargar versión en negrita
-                    bold_font_name = font_name.replace('.ttf', 'bd.ttf').replace('.TTF', 'bd.TTF')
-                    font = load_font(bold_font_name, font_size)
-                except:
-                    pass
-            elif font_style == 'italic':
-                try:
-                    italic_font_name = font_name.replace('.ttf', 'i.ttf').replace('.TTF', 'i.TTF')
-                    font = load_font(italic_font_name, font_size)
-                except:
-                    pass
+            print(f"🔤 Cargando fuente: {font_name}, estilo: {font_style}, tamaño: {font_size}")
+            font = load_font(font_name, font_size, font_style)
             
             # Calcular posición según alineación
             if align_type == 'center_x':
@@ -299,7 +352,7 @@ def preview_position():
                 x = (img_width - text_width) // 2
                 y = img_height - text_height - 50
             
-            # Dibujar texto con fuente actual
+            # Dibujar texto
             draw.text((x, y), sample_text, font=font, fill=font_color)
             
             # Guardar en buffer
@@ -318,6 +371,7 @@ def preview_position():
             })
     
     except Exception as e:
+        print(f"❌ Error en vista previa: {str(e)}")
         return jsonify({'error': f'Error en vista previa: {str(e)}'}), 500
 
 @app.route('/generate-diplomas', methods=['POST'])
@@ -374,21 +428,7 @@ def generate_diplomas():
                 img_width, img_height = img.size
                 
                 # Cargar fuente con estilo
-                font = load_font(font_name, font_size)
-                
-                # Aplicar estilo si es posible
-                if font_style == 'bold':
-                    try:
-                        bold_font_name = font_name.replace('.ttf', 'bd.ttf').replace('.TTF', 'bd.TTF')
-                        font = load_font(bold_font_name, font_size)
-                    except:
-                        pass
-                elif font_style == 'italic':
-                    try:
-                        italic_font_name = font_name.replace('.ttf', 'i.ttf').replace('.TTF', 'i.TTF')
-                        font = load_font(italic_font_name, font_size)
-                    except:
-                        pass
+                font = load_font(font_name, font_size, font_style)
                 
                 # Calcular posición según alineación
                 final_x, final_y = x, y
@@ -423,7 +463,7 @@ def generate_diplomas():
                 shutil.copy2(output_path, os.path.join(app.config['OUTPUT_FOLDER'], output_filename))
             
             except Exception as e:
-                print(f"Error con {name}: {e}")
+                print(f"⚠ Error con {name}: {e}")
                 continue
         
         if not generated_files:
@@ -463,6 +503,7 @@ def generate_diplomas():
         })
         
     except Exception as e:
+        print(f"❌ Error al generar diplomas: {str(e)}")
         return jsonify({'error': f'Error al generar diplomas: {str(e)}'}), 500
 
 @app.route('/download/<filename>')
@@ -485,6 +526,35 @@ def uploaded_file(filename):
     except:
         return '', 404
 
+@app.route('/check-fonts', methods=['GET'])
+def check_fonts():
+    """Verifica qué fuentes están disponibles"""
+    fonts_to_check = [
+        'arial.ttf',
+        'arialbd.ttf',
+        'ariali.ttf',
+        'times.ttf',
+        'timesbd.ttf',
+        'cour.ttf',
+        'courbd.ttf'
+    ]
+    
+    available_fonts = []
+    missing_fonts = []
+    
+    for font in fonts_to_check:
+        font_path = get_font_path(font, 'normal')
+        if font_path and os.path.exists(font_path):
+            available_fonts.append(font)
+        else:
+            missing_fonts.append(font)
+    
+    return jsonify({
+        'available': available_fonts,
+        'missing': missing_fonts,
+        'fonts_folder': os.path.abspath(app.config['FONTS_FOLDER'])
+    })
+
 @app.route('/test-font', methods=['POST'])
 def test_font():
     """Prueba si una fuente está disponible"""
@@ -492,17 +562,18 @@ def test_font():
         data = request.json
         font_name = data.get('font_name', 'arial.ttf')
         font_size = data.get('font_size', 40)
+        font_style = data.get('font_style', 'normal')
         
         try:
-            font = load_font(font_name, font_size)
+            font = load_font(font_name, font_size, font_style)
             return jsonify({
                 'success': True,
-                'message': f'Fuente {font_name} cargada correctamente'
+                'message': f'Fuente {font_name} ({font_style}) cargada correctamente'
             })
         except Exception as e:
             return jsonify({
                 'success': False,
-                'message': f'Fuente {font_name} no disponible: {str(e)}'
+                'message': f'Fuente {font_name} ({font_style}) no disponible: {str(e)}'
             })
     except Exception as e:
         return jsonify({'error': f'Error probando fuente: {str(e)}'}), 500
@@ -511,30 +582,23 @@ def test_font():
 def get_available_fonts_api():
     """Devuelve fuentes disponibles"""
     fonts = [
-        {'name': 'Arial', 'file': 'arial.ttf'},
-        {'name': 'Arial Negrita', 'file': 'arialbd.ttf'},
-        {'name': 'Arial Cursiva', 'file': 'ariali.ttf'},
-        {'name': 'Times New Roman', 'file': 'times.ttf'},
-        {'name': 'Times New Roman Negrita', 'file': 'timesbd.ttf'},
-        {'name': 'Courier New', 'file': 'cour.ttf'},
-        {'name': 'Courier New Negrita', 'file': 'courbd.ttf'},
-        {'name': 'Verdana', 'file': 'verdana.ttf'},
-        {'name': 'Verdana Negrita', 'file': 'verdanab.ttf'},
-        {'name': 'Georgia', 'file': 'georgia.ttf'},
-        {'name': 'Georgia Negrita', 'file': 'georgiab.ttf'}
+        {'name': 'Arial Normal', 'file': 'arial.ttf', 'style': 'normal'},
+        {'name': 'Arial Negrita', 'file': 'arial.ttf', 'style': 'bold'},
+        {'name': 'Arial Cursiva', 'file': 'arial.ttf', 'style': 'italic'},
+        {'name': 'Times New Roman Normal', 'file': 'times.ttf', 'style': 'normal'},
+        {'name': 'Times New Roman Negrita', 'file': 'times.ttf', 'style': 'bold'},
+        {'name': 'Courier New Normal', 'file': 'cour.ttf', 'style': 'normal'},
+        {'name': 'Courier New Negrita', 'file': 'cour.ttf', 'style': 'bold'},
     ]
     
     available_fonts = []
     for font in fonts:
         try:
-            if get_font_path(font['file']):
+            font_path = get_font_path(font['file'], font['style'])
+            if font_path and os.path.exists(font_path):
                 available_fonts.append(font)
         except:
             pass
-    
-    # Siempre incluir Arial como fallback
-    if not any(f['file'] == 'arial.ttf' for f in available_fonts):
-        available_fonts.append({'name': 'Arial', 'file': 'arial.ttf'})
     
     return jsonify({'fonts': available_fonts})
 
@@ -544,15 +608,30 @@ if __name__ == '__main__':
     print("=" * 70)
     
     # Crear carpeta fonts si no existe
-    if not os.path.exists('fonts'):
-        os.makedirs('fonts')
-        print("📁 Carpeta 'fonts' creada.")
-        print("💡 Tip: Copia tus fuentes .ttf aquí para más opciones")
+    fonts_folder = app.config['FONTS_FOLDER']
+    if not os.path.exists(fonts_folder):
+        os.makedirs(fonts_folder)
+        print(f"📁 Carpeta 'fonts' creada en: {os.path.abspath(fonts_folder)}")
+        print("💡 Copia archivos .ttf a esta carpeta para más opciones de fuentes")
+    
+    # Verificar fuentes disponibles
+    print("\n🔍 Verificando fuentes disponibles...")
+    
+    # Lista de fuentes comunes
+    common_fonts = ['arial.ttf', 'times.ttf', 'cour.ttf']
+    fonts_found = []
+    
+    for font in common_fonts:
+        path = get_font_path(font, 'normal')
+        if path and os.path.exists(path):
+            fonts_found.append(font)
+            print(f"✅ {font}")
+        else:
+            print(f"⚠ {font} (no encontrada)")
     
     print(f"\n📁 Directorios:")
     print(f"   • Plantillas: {os.path.abspath('uploads')}")
     print(f"   • Diplomas: {os.path.abspath('diplomas_generados')}")
-    print(f"   • Templates: {os.path.abspath('templates')}")
     print(f"   • Fuentes: {os.path.abspath('fonts')}")
     
     print(f"\n🌐 Acceso:")
@@ -560,28 +639,14 @@ if __name__ == '__main__':
     print(f"   • Host: 0.0.0.0")
     print(f"   • Puerto: 5000")
     
-    print(f"\n✅ Características:")
-    print(f"   • Tildes y caracteres especiales soportados (á, é, í, ó, ú, ñ)")
-    print(f"   • Fuentes con estilos (normal, negrita, cursiva)")
-    print(f"   • Tamaño de fuente ajustable (10-200px)")
-    print(f"   • Posicionamiento preciso")
-    print(f"   • Vista previa en tiempo real")
-    
     print(f"\n🚀 Para comenzar:")
     print(f"   1. Abre http://localhost:5000 en tu navegador")
-    print(f"   2. Sube una plantilla de diploma (JPG, PNG)")
+    print(f"   2. Sube una plantilla de diploma")
     print(f"   3. Configura la posición y estilo del texto")
     print(f"   4. Ingresa los nombres con tildes")
     print(f"   5. ¡Genera y descarga!")
-    print("\n" + "=" * 70)
     
-    # Verificar dependencias
-    try:
-        from PIL import Image, ImageDraw, ImageFont
-        print("✅ Pillow instalado correctamente")
-    except ImportError:
-        print("❌ ERROR: Ejecuta: pip install Pillow")
-        exit(1)
+    print("\n" + "=" * 70)
     
     # Iniciar servidor
     app.run(
