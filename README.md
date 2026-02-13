@@ -13,7 +13,7 @@ Este proyecto tiene como propósito enseñar cómo automatizar procesos de gener
 
 - 🖼️ **Carga de Plantillas**: Permite subir plantillas base de diplomas en formatos JPG o PNG.
 - 🎯 **Configuración de Texto**: Ofrece control total sobre posición, tamaño, color, estilo y tipo de letra del texto a superponer.
-- 👥 **Gestión de Nombres**: Ingresa o importa listas de nombres desde archivos TXT, CSV o Excel.
+- 👥 **Gestión de Nombres**: Ingresa el nombre copiado de un .txt o Excel.
 - ✨ **Soporte de Tildes**: Procesa correctamente caracteres especiales del español (á, é, í, ó, ú, ñ).
 - 👁️ **Vista Previa**: Muestra en tiempo real cómo quedará el texto en la plantilla antes de la generación masiva.
 - 🚀 **Generación Masiva**: Crea cientos o miles de diplomas personalizados en segundos.
