@@ -1,5 +1,4 @@
-# 🎓 XONI-DIP
-
+# 🎓 XONI-DIP by Darian Alberto Camacho Salas
 **Advertencia:** Este código tiene **únicamente fines educativos**. Está diseñado para enseñar los principios de automatización de procesos y generación de documentos. No debe utilizarse para la creación de diplomas, certificados o documentos oficiales sin las autorizaciones correspondientes.
 
 ---
