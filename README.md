@@ -43,7 +43,7 @@ Si tienes preguntas sobre los conceptos de programación, procesamiento de imág
 - 📘 **Facebook:** [xonidu](https://www.facebook.com/profile.php?id=61572209206888)
 - 📧 **Email:** xonidu@gmail.com
 
-**Nota:** Este proyecto es únicamente para fines educativos y de aprendizaje. No está diseñado para uso comercial ni para la generación de documentos oficiales.
+**Nota:** Este proyecto es únicamente para fines educativos y de aprendizaje. No está diseñado para uso comercial ni para la generación de documentos oficiales sin autorización.
 
 ---
 
