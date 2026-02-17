@@ -22,20 +22,7 @@ Este proyecto tiene como propósito enseñar cómo automatizar procesos de gener
 
 ---
 
-## 🛡️ Aspectos Educativos
-
-Este proyecto enseña:
-- **Desarrollo con Flask**: Creación de aplicaciones web en Python.
-- **Procesamiento de Imágenes con Pillow**: Manipulación y edición de imágenes programáticamente.
-- **Manejo de Archivos**: Procesamiento de diferentes formatos (TXT, CSV, Excel, imágenes).
-- **Codificación UTF-8**: Gestión correcta de caracteres especiales en español.
-- **Automatización de Procesos**: Diseño de flujos de trabajo automatizados.
-- **Interfaces de Usuario**: Creación de interfaces web intuitivas y responsivas.
-- **Generación de Documentos**: Técnicas para crear documentos personalizados de manera masiva.
-
----
-
-## ❓ ¿Dudas o sugerencias educativas?
+## ❓ ¿Dudas o sugerencias?
 
 Si tienes preguntas sobre los conceptos de programación, procesamiento de imágenes o automatización enseñados en este proyecto:
 
@@ -43,20 +30,6 @@ Si tienes preguntas sobre los conceptos de programación, procesamiento de imág
 - 📘 **Facebook:** [xonidu](https://www.facebook.com/profile.php?id=61572209206888)
 - 📧 **Email:** xonidu@gmail.com
 
-**Nota:** Este proyecto es únicamente para fines educativos y de aprendizaje. No está diseñado para uso comercial ni para la generación de documentos oficiales sin autorización.
+**Nota:** Este proyecto es únicamente para fines de apoyo y de automatización. No está diseñado para uso comercial ni para la generación de documentos oficiales sin autorización.
 
 ---
-
-## 📚 Aviso de Uso Educativo
-
-Este software se proporciona "tal cual", sin garantía de ningún tipo. El autor no se hace responsable del uso que se le dé a este código. El usuario es el único responsable de cumplir con todas las leyes y regulaciones aplicables en su jurisdicción respecto a la generación de documentos.
-
-**Uso Aceptable:**
-- Práctica de programación y desarrollo de habilidades técnicas.
-- Demostración de conceptos de automatización en entornos educativos.
-- Aprendizaje sobre procesamiento de imágenes y manipulación de archivos.
-
-**Uso No Aceptable:**
-- Generación de diplomas, certificados o documentos oficiales sin autorización.
-- Uso comercial sin las licencias y permisos adecuados.
-- Cualquier actividad que infrinja derechos de autor o leyes locales.
