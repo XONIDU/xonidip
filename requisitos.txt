@@ -1,16 +1,17 @@
 # Somos XONINDU
+# Creador: Darian Alberto Camacho Salas
 
 # Arch linux
 sudo pacman -S python-pip
-pip install flask pillow pandas openpyxl --break-system-packages
+pip install flask pillow pandas openpyxl qrcode --break-system-packages
 
 # Ubuntu y derivados
 sudo apt update
 sudo apt install python3 python3-pip -y
-pip3 install flask pillow pandas openpyxl --break-system-packages
+pip3 install flask pillow pandas openpyxl qrcode --break-system-packages
 
 # Windows
-pip install flask pillow pandas openpyxl
+pip install flask pillow pandas openpyxl qrcode
 
 # Ejecucion:
 python start.py
