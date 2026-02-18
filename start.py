@@ -1,6 +1,7 @@
 import os
 import io
 import zipfile
+import socket
 from flask import Flask, render_template, request, send_file, jsonify, send_from_directory, url_for
 from PIL import Image, ImageDraw, ImageFont
 import pandas as pd
@@ -12,6 +13,7 @@ from datetime import datetime
 import base64
 import time
 import unicodedata
+import qrcode
 
 app = Flask(__name__)
 
@@ -27,6 +29,42 @@ app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'txt', 'csv', 'xlsx', 
 for folder in [app.config['UPLOAD_FOLDER'], app.config['OUTPUT_FOLDER'], app.config['FONTS_FOLDER']]:
     if not os.path.exists(folder):
         os.makedirs(folder)
+
+# ===== FUNCIÓN PARA OBTENER IP =====
+def get_server_url():
+    """Obtiene la URL del servidor con IP y puerto"""
+    try:
+        # Obtener IP local
+        hostname = socket.gethostname()
+        local_ip = socket.gethostbyname(hostname)
+        return f"http://{local_ip}:5000"
+    except:
+        return "http://localhost:5000"
+
+# ===== FUNCIÓN PARA GENERAR QR =====
+def generate_qr_base64(url):
+    """Genera un código QR en base64 para mostrar en HTML"""
+    try:
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
+        )
+        qr.add_data(url)
+        qr.make(fit=True)
+        
+        img = qr.make_image(fill_color="black", back_color="white")
+        
+        # Convertir a base64
+        buffered = io.BytesIO()
+        img.save(buffered, format="PNG")
+        img_str = base64.b64encode(buffered.getvalue()).decode()
+        
+        return img_str
+    except Exception as e:
+        print(f"Error generando QR: {e}")
+        return None
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -204,7 +242,27 @@ def load_font(font_name, font_size, font_style='normal'):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    # Obtener URL y generar QR
+    server_url = get_server_url()
+    qr_base64 = generate_qr_base64(server_url)
+    
+    return render_template('index.html', 
+                         qr_code=qr_base64, 
+                         server_url=server_url)
+
+@app.route('/qr_code')
+def qr_code():
+    """Endpoint para obtener el código QR como JSON"""
+    server_url = get_server_url()
+    qr_base64 = generate_qr_base64(server_url)
+    
+    if qr_base64:
+        return jsonify({
+            "qr_base64": qr_base64,
+            "url": server_url
+        })
+    else:
+        return jsonify({"error": "No se pudo generar el QR"}), 500
 
 @app.route('/upload-template', methods=['POST'])
 def upload_template():
@@ -603,6 +661,8 @@ def get_available_fonts_api():
     return jsonify({'fonts': available_fonts})
 
 if __name__ == '__main__':
+    server_url = get_server_url()
+    
     print("=" * 70)
     print("🎓 XONI-DIP - GENERADOR MASIVO DE DIPLOMAS 🎓")
     print("=" * 70)
@@ -620,31 +680,28 @@ if __name__ == '__main__':
     # Lista de fuentes comunes
     common_fonts = ['arial.ttf', 'times.ttf', 'cour.ttf']
     fonts_found = []
+        
+    print(f"\n🌐 ACCESO DESDE CUALQUIER DISPOSITIVO:")
+    print(f"   • {server_url}")
     
-    for font in common_fonts:
-        path = get_font_path(font, 'normal')
-        if path and os.path.exists(path):
-            fonts_found.append(font)
-            print(f"✅ {font}")
-        else:
-            print(f"⚠ {font} (no encontrada)")
-    
-    print(f"\n📁 Directorios:")
-    print(f"   • Plantillas: {os.path.abspath('uploads')}")
-    print(f"   • Diplomas: {os.path.abspath('diplomas_generados')}")
-    print(f"   • Fuentes: {os.path.abspath('fonts')}")
-    
-    print(f"\n🌐 Acceso:")
-    print(f"   • URL: http://localhost:5000")
-    print(f"   • Host: 0.0.0.0")
-    print(f"   • Puerto: 5000")
+    # Generar QR
+    try:
+        qr_ascii = qrcode.QRCode()
+        qr_ascii.add_data(server_url)
+        print("\n📱 Escanea este código QR desde tu teléfono:")
+        print("-" * 50)
+        qr_ascii.print_ascii()
+        print("-" * 50)
+    except:
+        pass
     
     print(f"\n🚀 Para comenzar:")
-    print(f"   1. Abre http://localhost:5000 en tu navegador")
-    print(f"   2. Sube una plantilla de diploma")
-    print(f"   3. Configura la posición y estilo del texto")
-    print(f"   4. Ingresa los nombres con tildes")
-    print(f"   5. ¡Genera y descarga!")
+    print(f"   1. Abre {server_url} en tu navegador")
+    print(f"   2. O escanea el QR desde tu teléfono")
+    print(f"   3. Sube una plantilla de diploma")
+    print(f"   4. Configura la posición y estilo del texto")
+    print(f"   5. Ingresa los nombres con tildes")
+    print(f"   6. ¡Genera y descarga!")
     
     print("\n" + "=" * 70)
     
