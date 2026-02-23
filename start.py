@@ -694,7 +694,7 @@ if __name__ == '__main__':
         print("-" * 50)
     except:
         pass
-    
+    print("Somos XONIDU\nDarian Alberto Camacho Salas")    
     print(f"\n🚀 Para comenzar:")
     print(f"   1. Abre {server_url} en tu navegador")
     print(f"   2. O escanea el QR desde tu teléfono")
