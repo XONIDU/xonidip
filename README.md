@@ -22,6 +22,15 @@ Este proyecto tiene como propósito enseñar cómo automatizar procesos de gener
 
 ---
 
+## 📥 Instalación
+
+Clona el repositorio desde GitHub:
+
+```bash
+git clone https://github.com/XONIDU/xonidip.git
+cd xonidip
+```
+
 ## ❓ ¿Dudas o sugerencias?
 
 Si tienes preguntas sobre los conceptos de programación, procesamiento de imágenes o automatización enseñados en este proyecto:
