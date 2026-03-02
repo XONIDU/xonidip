@@ -34,7 +34,6 @@ for folder in [app.config['UPLOAD_FOLDER'], app.config['OUTPUT_FOLDER'], app.con
 def get_server_url():
     """Obtiene la URL del servidor con IP y puerto"""
     try:
-        # Obtener IP local
         hostname = socket.gethostname()
         local_ip = socket.gethostbyname(hostname)
         return f"http://{local_ip}:5000"
@@ -56,7 +55,6 @@ def generate_qr_base64(url):
         
         img = qr.make_image(fill_color="black", back_color="white")
         
-        # Convertir a base64
         buffered = io.BytesIO()
         img.save(buffered, format="PNG")
         img_str = base64.b64encode(buffered.getvalue()).decode()
@@ -87,7 +85,7 @@ def extract_names_from_file(file):
             file.seek(0)
             lines = content.strip().split('\n')
             for i, line in enumerate(lines):
-                if i == 0 and 'nombre' in line.lower():  # Skip header
+                if i == 0 and 'nombre' in line.lower():
                     continue
                 parts = line.strip().split(',')
                 if parts and parts[0].strip():
@@ -96,13 +94,11 @@ def extract_names_from_file(file):
         elif filename.endswith(('.xlsx', '.xls')):
             df = pd.read_excel(file)
             file.seek(0)
-            # Buscar columna que contenga nombres
             for col in df.columns:
                 if any(keyword in str(col).lower() for keyword in ['nombre', 'name', 'participante', 'alumno']):
                     names = [str(name).strip() for name in df[col].dropna().tolist() if str(name).strip()]
                     break
             if not names and len(df.columns) > 0:
-                # Tomar primera columna
                 names = [str(name).strip() for name in df[df.columns[0]].dropna().tolist() if str(name).strip()]
     
     except Exception as e:
@@ -111,27 +107,24 @@ def extract_names_from_file(file):
     
     return names
 
-def normalize_text(text):
-    """Normaliza texto para mantener tildes y caracteres especiales"""
-    return text
-
 def get_text_dimensions(text, font, draw):
     """Obtiene dimensiones del texto para centrado preciso"""
     try:
-        # Método moderno (PIL 8.0.0+)
         if hasattr(draw, 'textbbox'):
             bbox = draw.textbbox((0, 0), text, font=font)
             return bbox[2] - bbox[0], bbox[3] - bbox[1]
         else:
-            # Método antiguo
             return font.getsize(text)
     except:
-        # Estimación aproximada
         return len(text) * font.size // 2, font.size
+
+def get_centered_position(x, y, text, font, draw):
+    """Calcula la posición para que (x,y) sea el CENTRO del texto"""
+    ancho, alto = get_text_dimensions(text, font, draw)
+    return x - (ancho // 2), y - (alto // 2)
 
 def get_font_path(font_name, style='normal'):
     """Obtiene la ruta completa de una fuente con estilo"""
-    # Mapeo de nombres de fuentes a archivos reales
     font_mappings = {
         'arial.ttf': {
             'normal': ['arial.ttf', 'arial.ttf', 'Arial.ttf', 'arial.ttf'],
@@ -145,19 +138,12 @@ def get_font_path(font_name, style='normal'):
         'cour.ttf': {
             'normal': ['cour.ttf', 'cour.ttf', 'CourierNew.ttf', 'cour.ttf'],
             'bold': ['courbd.ttf', 'courb.ttf', 'CourierNewBold.ttf', 'courbd.ttf']
-        },
-        'verdana.ttf': {
-            'normal': ['verdana.ttf', 'verdana.ttf', 'Verdana.ttf', 'verdana.ttf']
-        },
-        'georgia.ttf': {
-            'normal': ['georgia.ttf', 'georgia.ttf', 'Georgia.ttf', 'georgia.ttf']
         }
     }
     
-    # Rutas donde buscar fuentes (en orden de prioridad)
     font_paths = [
-        app.config['FONTS_FOLDER'],  # Carpeta local fonts/
-        os.path.join(os.path.dirname(__file__), 'fonts'),  # Ruta absoluta
+        app.config['FONTS_FOLDER'],
+        os.path.join(os.path.dirname(__file__), 'fonts'),
         "fonts/",
         "/usr/share/fonts/",
         "/usr/local/share/fonts/",
@@ -167,72 +153,55 @@ def get_font_path(font_name, style='normal'):
         "C:/Windows/Fonts/"
     ]
     
-    # Verificar si es una fuente conocida
     base_name = font_name.lower()
     if base_name in font_mappings and style in font_mappings[base_name]:
         font_variants = font_mappings[base_name][style]
     else:
-        # Si no es una fuente conocida, usar el nombre directamente
         font_variants = [font_name]
     
-    # Buscar en todas las rutas
     for path in font_paths:
         if not os.path.exists(path):
             continue
-            
         for variant in font_variants:
             font_path = os.path.join(path, variant)
             if os.path.exists(font_path):
                 print(f"✓ Encontrada fuente: {font_path}")
                 return font_path
     
-    # Si no se encuentra, usar fuente por defecto del sistema
     return None
 
 def create_fallback_font(font_size):
     """Crea una fuente por defecto si no hay fuentes disponibles"""
     try:
-        # Intentar cargar cualquier fuente disponible
-        for path in ['/System/Library/Fonts/Helvetica.ttc', 
-                    '/System/Library/Fonts/Helvetica.dfont',
-                    'C:\\Windows\\Fonts\\arial.ttf']:
+        for path in ['/usr/share/fonts/TTF/DejaVuSans.ttf', 
+                    '/usr/share/fonts/liberation/LiberationSans-Regular.ttf',
+                    '/System/Library/Fonts/Helvetica.ttc']:
             if os.path.exists(path):
                 return ImageFont.truetype(path, font_size)
     except:
         pass
     
-    # Si no hay fuentes, usar la por defecto de PIL
     try:
         return ImageFont.load_default().font_variant(size=font_size)
     except:
-        # Último recurso: crear una fuente simple
         return ImageFont.load_default()
 
 def load_font(font_name, font_size, font_style='normal'):
     """Carga una fuente con estilo con manejo de errores mejorado"""
     try:
-        # Primero intentar cargar con estilo específico
         font_path = get_font_path(font_name, font_style)
-        
         if font_path and os.path.exists(font_path):
             return ImageFont.truetype(font_path, font_size)
         
-        # Si no se encuentra con estilo, buscar la fuente base
         font_path = get_font_path(font_name, 'normal')
         if font_path and os.path.exists(font_path):
             font = ImageFont.truetype(font_path, font_size)
-            
-            # Simular estilos si es necesario
             if font_style == 'bold':
-                # Para simular negrita, aumentamos ligeramente el tamaño
                 return ImageFont.truetype(font_path, int(font_size * 1.1))
             elif font_style == 'italic':
-                # Para cursiva no podemos hacer mucho sin la fuente real
                 return font
-            
             return font
         
-        # Si no se encuentra ninguna fuente, usar fallback
         print(f"⚠ No se encontró la fuente {font_name}. Usando fuente por defecto.")
         return create_fallback_font(font_size)
         
@@ -242,7 +211,6 @@ def load_font(font_name, font_size, font_style='normal'):
 
 @app.route('/')
 def index():
-    # Obtener URL y generar QR
     server_url = get_server_url()
     qr_base64 = generate_qr_base64(server_url)
     
@@ -252,15 +220,11 @@ def index():
 
 @app.route('/qr_code')
 def qr_code():
-    """Endpoint para obtener el código QR como JSON"""
     server_url = get_server_url()
     qr_base64 = generate_qr_base64(server_url)
     
     if qr_base64:
-        return jsonify({
-            "qr_base64": qr_base64,
-            "url": server_url
-        })
+        return jsonify({"qr_base64": qr_base64, "url": server_url})
     else:
         return jsonify({"error": "No se pudo generar el QR"}), 500
 
@@ -283,7 +247,6 @@ def upload_template():
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         template_file.save(filepath)
         
-        # Obtener dimensiones
         try:
             with Image.open(filepath) as img:
                 width, height = img.size
@@ -291,13 +254,19 @@ def upload_template():
                 # Crear miniatura para vista previa
                 preview_size = (800, 600)
                 img_copy = img.copy()
-                img_copy.thumbnail(preview_size, Image.Resampling.LANCZOS)
                 
-                # Guardar miniatura
+                # Compatibilidad con versiones de Pillow
+                try:
+                    img_copy.thumbnail(preview_size, Image.Resampling.LANCZOS)
+                except AttributeError:
+                    try:
+                        img_copy.thumbnail(preview_size, Image.ANTIALIAS)
+                    except AttributeError:
+                        img_copy.thumbnail(preview_size)
+                
                 preview_filename = 'preview_' + filename
                 preview_path = os.path.join(app.config['UPLOAD_FOLDER'], preview_filename)
                 
-                # Convertir a RGB si es necesario
                 if img_copy.mode != 'RGB':
                     img_copy = img_copy.convert('RGB')
                 
@@ -328,7 +297,6 @@ def process_names():
         if source_type == 'text':
             text_names = request.form.get('names_text', '')
             if text_names:
-                # Mantener tildes y caracteres especiales
                 names = [name.strip() for name in text_names.split('\n') if name.strip()]
         
         elif source_type == 'file' and 'names_file' in request.files:
@@ -336,7 +304,6 @@ def process_names():
             if file and allowed_file(file.filename):
                 names = extract_names_from_file(file)
         
-        # Limpiar y validar nombres (manteniendo tildes)
         names = list(dict.fromkeys([name for name in names if name and len(name.strip()) > 0]))
         
         if not names:
@@ -353,7 +320,7 @@ def process_names():
 
 @app.route('/preview-position', methods=['POST'])
 def preview_position():
-    """Crea una vista previa con el texto en posición"""
+    """Crea una vista previa con el texto centrado en la posición indicada"""
     try:
         data = request.json
         if not data:
@@ -365,67 +332,49 @@ def preview_position():
         if not template_path or not os.path.exists(template_path):
             return jsonify({'error': 'Plantilla no encontrada'}), 400
         
-        # Configuración
-        x = int(text_config.get('x', 100))
-        y = int(text_config.get('y', 100))
+        # Configuración (estos valores son el CENTRO deseado)
+        centro_x = int(text_config.get('x', 100))
+        centro_y = int(text_config.get('y', 100))
         font_size = int(text_config.get('font_size', 40))
         font_color = text_config.get('font_color', '#000000')
         font_name = text_config.get('font_name', 'arial.ttf')
         font_style = text_config.get('font_style', 'normal')
         sample_text = text_config.get('sample_text', 'José María Rodríguez')
-        align_type = text_config.get('align_type', 'manual')
         
-        # Convertir color
         if font_color.startswith('#'):
             font_color = tuple(int(font_color[i:i+2], 16) for i in (1, 3, 5))
         else:
             font_color = (0, 0, 0)
         
-        # Cargar imagen
         with Image.open(template_path) as img:
             if img.mode != 'RGB':
                 img = img.convert('RGB')
             
             draw = ImageDraw.Draw(img)
-            img_width, img_height = img.size
             
-            # Cargar fuente con estilo
-            print(f"🔤 Cargando fuente: {font_name}, estilo: {font_style}, tamaño: {font_size}")
             font = load_font(font_name, font_size, font_style)
             
-            # Calcular posición según alineación
-            if align_type == 'center_x':
-                text_width, text_height = get_text_dimensions(sample_text, font, draw)
-                x = (img_width - text_width) // 2
-            elif align_type == 'center_xy':
-                text_width, text_height = get_text_dimensions(sample_text, font, draw)
-                x = (img_width - text_width) // 2
-                y = (img_height - text_height) // 2
-            elif align_type == 'top_center':
-                text_width, text_height = get_text_dimensions(sample_text, font, draw)
-                x = (img_width - text_width) // 2
-                y = 50
-            elif align_type == 'bottom_center':
-                text_width, text_height = get_text_dimensions(sample_text, font, draw)
-                x = (img_width - text_width) // 2
-                y = img_height - text_height - 50
+            # Calcular posición de esquina para que el centro sea (centro_x, centro_y)
+            x, y = get_centered_position(centro_x, centro_y, sample_text, font, draw)
             
-            # Dibujar texto
+            # Dibujar un punto rojo en el centro para referencia
+            radio = 3
+            draw.ellipse((centro_x - radio, centro_y - radio, centro_x + radio, centro_y + radio), fill='red')
+            
+            # Dibujar texto centrado
             draw.text((x, y), sample_text, font=font, fill=font_color)
             
-            # Guardar en buffer
             buffered = io.BytesIO()
             img.save(buffered, format="JPEG", quality=85)
             buffered.seek(0)
             
-            # Convertir a base64
             img_str = base64.b64encode(buffered.read()).decode()
             
             return jsonify({
                 'success': True,
                 'preview': f'data:image/jpeg;base64,{img_str}',
-                'position': {'x': x, 'y': y},
-                'dimensions': {'width': img_width, 'height': img_height}
+                'position': {'x': centro_x, 'y': centro_y},
+                'dimensions': {'width': img.width, 'height': img.height}
             })
     
     except Exception as e:
@@ -434,7 +383,7 @@ def preview_position():
 
 @app.route('/generate-diplomas', methods=['POST'])
 def generate_diplomas():
-    """Genera los diplomas con los nombres proporcionados"""
+    """Genera los diplomas con los nombres centrados en la posición indicada"""
     try:
         data = request.json
         if not data:
@@ -450,26 +399,22 @@ def generate_diplomas():
         if not names:
             return jsonify({'error': 'No hay nombres para procesar'}), 400
         
-        # Configuración
-        x = int(text_config.get('x', 100))
-        y = int(text_config.get('y', 100))
+        # Configuración (estos valores son el CENTRO deseado)
+        centro_x = int(text_config.get('x', 100))
+        centro_y = int(text_config.get('y', 100))
         font_size = int(text_config.get('font_size', 40))
         font_color = text_config.get('font_color', '#000000')
         font_name = text_config.get('font_name', 'arial.ttf')
         font_style = text_config.get('font_style', 'normal')
-        align_type = text_config.get('align_type', 'manual')
         
-        # Convertir color
         if font_color.startswith('#'):
             font_color = tuple(int(font_color[i:i+2], 16) for i in (1, 3, 5))
         else:
             font_color = (0, 0, 0)
         
-        # Crear carpeta temporal
         temp_dir = tempfile.mkdtemp()
         generated_files = []
         
-        # Cargar plantilla base una vez
         try:
             base_template = Image.open(template_path)
             if base_template.mode != 'RGB':
@@ -477,47 +422,25 @@ def generate_diplomas():
         except Exception as e:
             return jsonify({'error': f'Error al cargar plantilla: {str(e)}'}), 500
         
-        # Generar diplomas
         for i, name in enumerate(names):
             try:
-                # Crear copia de la plantilla
                 img = base_template.copy()
                 draw = ImageDraw.Draw(img)
-                img_width, img_height = img.size
                 
-                # Cargar fuente con estilo
                 font = load_font(font_name, font_size, font_style)
                 
-                # Calcular posición según alineación
-                final_x, final_y = x, y
+                # Calcular posición de esquina para que el centro sea (centro_x, centro_y)
+                x, y = get_centered_position(centro_x, centro_y, name, font, draw)
                 
-                if align_type == 'center_x':
-                    text_width, text_height = get_text_dimensions(name, font, draw)
-                    final_x = (img_width - text_width) // 2
-                elif align_type == 'center_xy':
-                    text_width, text_height = get_text_dimensions(name, font, draw)
-                    final_x = (img_width - text_width) // 2
-                    final_y = (img_height - text_height) // 2
-                elif align_type == 'top_center':
-                    text_width, text_height = get_text_dimensions(name, font, draw)
-                    final_x = (img_width - text_width) // 2
-                    final_y = 50
-                elif align_type == 'bottom_center':
-                    text_width, text_height = get_text_dimensions(name, font, draw)
-                    final_x = (img_width - text_width) // 2
-                    final_y = img_height - text_height - 50
+                # Dibujar texto centrado
+                draw.text((x, y), name, font=font, fill=font_color)
                 
-                # Dibujar texto (manteniendo tildes)
-                draw.text((final_x, final_y), name, font=font, fill=font_color)
-                
-                # Guardar
                 safe_name = ''.join(c for c in name if c.isalnum() or c in (' ', '-', '_', 'ñ', 'Ñ', 'á', 'é', 'í', 'ó', 'ú', 'Á', 'É', 'Í', 'Ó', 'Ú'))[:50]
                 output_filename = f"diploma_{i+1:04d}_{safe_name}.jpg"
                 output_path = os.path.join(temp_dir, output_filename)
                 img.save(output_path, 'JPEG', quality=95)
                 generated_files.append(output_filename)
                 
-                # Guardar copia en output folder
                 shutil.copy2(output_path, os.path.join(app.config['OUTPUT_FOLDER'], output_filename))
             
             except Exception as e:
@@ -527,7 +450,6 @@ def generate_diplomas():
         if not generated_files:
             return jsonify({'error': 'No se generó ningún diploma'}), 500
         
-        # Crear ZIP
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         zip_filename = f'diplomas_{timestamp}.zip'
         zip_path = os.path.join(app.config['OUTPUT_FOLDER'], zip_filename)
@@ -538,7 +460,6 @@ def generate_diplomas():
                 if os.path.exists(file_path):
                     zipf.write(file_path, filename)
         
-        # Limpiar archivos individuales del output folder
         for filename in generated_files:
             file_path = os.path.join(app.config['OUTPUT_FOLDER'], filename)
             if os.path.exists(file_path):
@@ -547,7 +468,6 @@ def generate_diplomas():
                 except:
                     pass
         
-        # Limpiar temporal
         try:
             shutil.rmtree(temp_dir)
         except:
@@ -566,7 +486,6 @@ def generate_diplomas():
 
 @app.route('/download/<filename>')
 def download_file(filename):
-    """Descarga el archivo generado"""
     try:
         filepath = os.path.join(app.config['OUTPUT_FOLDER'], filename)
         if os.path.exists(filepath):
@@ -578,7 +497,6 @@ def download_file(filename):
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
-    """Sirve archivos subidos"""
     try:
         return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
     except:
@@ -586,7 +504,6 @@ def uploaded_file(filename):
 
 @app.route('/check-fonts', methods=['GET'])
 def check_fonts():
-    """Verifica qué fuentes están disponibles"""
     fonts_to_check = [
         'arial.ttf',
         'arialbd.ttf',
@@ -615,7 +532,6 @@ def check_fonts():
 
 @app.route('/test-font', methods=['POST'])
 def test_font():
-    """Prueba si una fuente está disponible"""
     try:
         data = request.json
         font_name = data.get('font_name', 'arial.ttf')
@@ -638,7 +554,6 @@ def test_font():
 
 @app.route('/get-available-fonts', methods=['GET'])
 def get_available_fonts_api():
-    """Devuelve fuentes disponibles"""
     fonts = [
         {'name': 'Arial Normal', 'file': 'arial.ttf', 'style': 'normal'},
         {'name': 'Arial Negrita', 'file': 'arial.ttf', 'style': 'bold'},
@@ -664,27 +579,20 @@ if __name__ == '__main__':
     server_url = get_server_url()
     
     print("=" * 70)
-    print("🎓 XONI-DIP - GENERADOR MASIVO DE DIPLOMAS 🎓")
+    print("🎓 XONI-DIP - GENERADOR MASIVO DE DIPLOMAS (CENTRADO) 🎓")
     print("=" * 70)
     
-    # Crear carpeta fonts si no existe
     fonts_folder = app.config['FONTS_FOLDER']
     if not os.path.exists(fonts_folder):
         os.makedirs(fonts_folder)
         print(f"📁 Carpeta 'fonts' creada en: {os.path.abspath(fonts_folder)}")
         print("💡 Copia archivos .ttf a esta carpeta para más opciones de fuentes")
     
-    # Verificar fuentes disponibles
     print("\n🔍 Verificando fuentes disponibles...")
     
-    # Lista de fuentes comunes
-    common_fonts = ['arial.ttf', 'times.ttf', 'cour.ttf']
-    fonts_found = []
-        
     print(f"\n🌐 ACCESO DESDE CUALQUIER DISPOSITIVO:")
     print(f"   • {server_url}")
     
-    # Generar QR
     try:
         qr_ascii = qrcode.QRCode()
         qr_ascii.add_data(server_url)
@@ -694,18 +602,19 @@ if __name__ == '__main__':
         print("-" * 50)
     except:
         pass
+    
     print("Somos XONIDU\nDarian Alberto Camacho Salas")    
     print(f"\n🚀 Para comenzar:")
     print(f"   1. Abre {server_url} en tu navegador")
     print(f"   2. O escanea el QR desde tu teléfono")
     print(f"   3. Sube una plantilla de diploma")
-    print(f"   4. Configura la posición y estilo del texto")
+    print(f"   4. Configura la posición (AHORA ES EL CENTRO DEL TEXTO)")
     print(f"   5. Ingresa los nombres con tildes")
     print(f"   6. ¡Genera y descarga!")
-    
+    print("\n✅ NUEVO: La posición configurada es el CENTRO del nombre")
+    print("✅ El texto se expande simétricamente a los lados")
     print("\n" + "=" * 70)
     
-    # Iniciar servidor
     app.run(
         debug=True,
         host='0.0.0.0',
