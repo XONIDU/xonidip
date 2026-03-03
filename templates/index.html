@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XONI-DIP - Generador de Diplomas</title>
+    <title>XONIDIP 2026 - Generador Profesional de Diplomas</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -14,7 +14,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #0A1F44; /* Azul sólido fuerte */
             min-height: 100vh;
             padding: 20px;
             color: #333;
@@ -30,23 +30,26 @@
         }
 
         header {
-            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            background: #003399; /* Azul fuerte sólido */
             color: white;
             padding: 40px;
             text-align: center;
+            border-bottom: 5px solid #FFD700; /* Dorado para contraste */
         }
 
         header h1 {
-            font-size: 3.2rem;
+            font-size: 4rem;
             margin-bottom: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 20px;
+            font-weight: 800;
+            letter-spacing: 2px;
         }
 
         header h1 i {
-            color: #f1c40f;
+            color: #FFD700;
             animation: pulse 2s infinite;
         }
 
@@ -54,6 +57,18 @@
             0% { transform: scale(1); }
             50% { transform: scale(1.1); }
             100% { transform: scale(1); }
+        }
+
+        .year-badge {
+            background: #FFD700;
+            color: #003399;
+            padding: 10px 30px;
+            border-radius: 50px;
+            font-size: 2rem;
+            font-weight: 800;
+            display: inline-block;
+            margin-top: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
         .subtitle {
@@ -71,17 +86,24 @@
         }
 
         .feature {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.15);
             padding: 10px 20px;
             border-radius: 20px;
             font-size: 0.9rem;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .feature-highlight {
+            background: #FFD700;
+            color: #003399;
+            font-weight: bold;
         }
 
         .steps-container {
             display: flex;
-            background: #f8f9fa;
+            background: #F0F4FF; /* Azul muy claro */
             padding: 0;
-            border-bottom: 1px solid #e9ecef;
+            border-bottom: 3px solid #003399;
         }
 
         .step-indicator {
@@ -92,11 +114,14 @@
             cursor: pointer;
             transition: all 0.3s ease;
             border-bottom: 4px solid transparent;
+            color: #003399;
+            font-weight: 600;
         }
 
         .step-indicator.active {
             background: white;
-            border-bottom-color: #3498db;
+            border-bottom-color: #FFD700;
+            border-bottom-width: 4px;
         }
 
         .step-number {
@@ -104,8 +129,8 @@
             width: 35px;
             height: 35px;
             line-height: 35px;
-            background: #dee2e6;
-            color: #495057;
+            background: #CCD9FF;
+            color: #003399;
             border-radius: 50%;
             font-weight: bold;
             margin-bottom: 10px;
@@ -113,14 +138,14 @@
         }
 
         .step-indicator.active .step-number {
-            background: #3498db;
+            background: #003399;
             color: white;
             transform: scale(1.1);
         }
 
         .step-title {
             font-weight: 600;
-            color: #495057;
+            color: #003399;
             font-size: 1.1rem;
         }
 
@@ -146,11 +171,11 @@
         .step-header {
             margin-bottom: 30px;
             padding-bottom: 20px;
-            border-bottom: 2px solid #f1f3f4;
+            border-bottom: 3px solid #FFD700;
         }
 
         .step-header h2 {
-            color: #2c3e50;
+            color: #003399;
             font-size: 2.2rem;
             display: flex;
             align-items: center;
@@ -158,38 +183,38 @@
         }
 
         .step-header h2 i {
-            color: #3498db;
+            color: #FFD700;
         }
 
         .upload-area {
-            border: 3px dashed #3498db;
+            border: 4px solid #003399;
             border-radius: 15px;
             padding: 50px;
             text-align: center;
-            background: #f8fafc;
+            background: #F8FAFF;
             cursor: pointer;
             transition: all 0.3s ease;
             margin: 20px 0;
         }
 
         .upload-area:hover {
-            background: #e3f2fd;
-            border-color: #2980b9;
+            background: #E6EEFF;
+            border-color: #FFD700;
             transform: translateY(-5px);
         }
 
         .upload-area i {
             font-size: 70px;
-            color: #3498db;
+            color: #003399;
             margin-bottom: 25px;
         }
 
         .preview-container {
             margin: 30px 0;
             padding: 25px;
-            background: #f8f9fa;
+            background: #F8FAFF;
             border-radius: 15px;
-            border: 1px solid #e9ecef;
+            border: 2px solid #003399;
         }
 
         .preview-wrapper {
@@ -197,17 +222,18 @@
             background: white;
             padding: 20px;
             border-radius: 10px;
+            border: 1px solid #CCD9FF;
         }
 
         #templatePreviewImg, #positionPreviewImg {
             max-width: 100%;
             max-height: 500px;
             border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 15px rgba(0,51,153,0.2);
         }
 
         .position-info {
-            background: linear-gradient(135deg, #3498db, #2c3e50);
+            background: #003399;
             color: white;
             padding: 20px;
             border-radius: 12px;
@@ -215,6 +241,7 @@
             text-align: center;
             font-size: 1.3rem;
             font-weight: 600;
+            border-left: 5px solid #FFD700;
         }
 
         .position-info span {
@@ -222,6 +249,7 @@
             padding: 5px 15px;
             border-radius: 20px;
             margin: 0 5px;
+            color: #FFD700;
         }
 
         .position-controls {
@@ -234,7 +262,7 @@
         .position-btn {
             padding: 15px;
             background: white;
-            border: 2px solid #dee2e6;
+            border: 2px solid #CCD9FF;
             border-radius: 10px;
             cursor: pointer;
             font-size: 1rem;
@@ -245,17 +273,18 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
+            color: #003399;
         }
 
         .position-btn:hover {
-            border-color: #3498db;
+            border-color: #003399;
         }
 
         .position-btn.active {
-            background: #3498db;
+            background: #003399;
             color: white;
-            border-color: #3498db;
-            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+            border-color: #FFD700;
+            box-shadow: 0 5px 15px rgba(0,51,153,0.3);
         }
 
         .controls-grid {
@@ -269,15 +298,15 @@
             background: white;
             padding: 25px;
             border-radius: 12px;
-            border: 1px solid #e9ecef;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            border: 2px solid #CCD9FF;
+            box-shadow: 0 3px 10px rgba(0,51,153,0.05);
         }
 
         .control-group label {
             display: block;
             margin-bottom: 12px;
             font-weight: 600;
-            color: #2c3e50;
+            color: #003399;
             font-size: 1.1rem;
             display: flex;
             align-items: center;
@@ -295,7 +324,7 @@
             flex: 1;
             height: 8px;
             border-radius: 4px;
-            background: #dee2e6;
+            background: #CCD9FF;
             outline: none;
             -webkit-appearance: none;
         }
@@ -305,9 +334,9 @@
             width: 22px;
             height: 22px;
             border-radius: 50%;
-            background: #3498db;
+            background: #003399;
             cursor: pointer;
-            border: 3px solid white;
+            border: 3px solid #FFD700;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
@@ -315,28 +344,29 @@
             min-width: 60px;
             text-align: center;
             font-weight: 600;
-            color: #2c3e50;
+            color: #003399;
             font-size: 1.1rem;
         }
 
         input[type="number"], select {
             width: 100%;
             padding: 12px;
-            border: 2px solid #dee2e6;
+            border: 2px solid #CCD9FF;
             border-radius: 8px;
             font-size: 1rem;
             transition: border-color 0.3s;
+            color: #003399;
         }
 
         input[type="number"]:focus, select:focus {
-            border-color: #3498db;
+            border-color: #FFD700;
             outline: none;
         }
 
         input[type="color"] {
             width: 60px;
             height: 60px;
-            border: 2px solid #dee2e6;
+            border: 2px solid #CCD9FF;
             border-radius: 8px;
             cursor: pointer;
             padding: 2px;
@@ -353,50 +383,127 @@
             flex: 1;
             padding: 12px;
             background: white;
-            border: 2px solid #dee2e6;
+            border: 2px solid #CCD9FF;
             border-radius: 8px;
             cursor: pointer;
             text-align: center;
             font-weight: 600;
             transition: all 0.3s ease;
+            color: #003399;
         }
 
         .font-style-btn:hover {
-            border-color: #3498db;
+            border-color: #003399;
         }
 
         .font-style-btn.active {
-            background: #3498db;
+            background: #003399;
             color: white;
-            border-color: #3498db;
+            border-color: #FFD700;
+        }
+
+        .format-selector {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .format-option {
+            flex: 1;
+            min-width: 120px;
+            padding: 20px;
+            background: white;
+            border: 3px solid #CCD9FF;
+            border-radius: 15px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+            color: #003399;
+        }
+
+        .format-option:hover {
+            border-color: #003399;
+            transform: translateY(-3px);
+        }
+
+        .format-option.active {
+            border-color: #FFD700;
+            background: #E6EEFF;
+        }
+
+        .format-option i {
+            font-size: 40px;
+            color: #003399;
+            margin-bottom: 10px;
+        }
+
+        .format-option h4 {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            color: #003399;
+        }
+
+        .format-option p {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .file-name-example {
+            background: #E6EEFF;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 25px 0;
+            border-left: 5px solid #FFD700;
+        }
+
+        .file-name-example h4 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #003399;
+            margin-bottom: 10px;
+        }
+
+        .file-name-example code {
+            background: white;
+            padding: 8px 15px;
+            border-radius: 6px;
+            display: inline-block;
+            margin: 5px 0;
+            font-size: 1rem;
+            border: 1px solid #003399;
+            color: #003399;
         }
 
         textarea {
             width: 100%;
             height: 250px;
             padding: 20px;
-            border: 2px solid #dee2e6;
+            border: 2px solid #CCD9FF;
             border-radius: 12px;
             font-family: inherit;
             font-size: 1.1rem;
             resize: vertical;
             line-height: 1.6;
             transition: border-color 0.3s;
+            color: #003399;
         }
 
         textarea:focus {
-            border-color: #3498db;
+            border-color: #FFD700;
             outline: none;
         }
 
         .names-info {
-            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            background: #003399;
             color: white;
             padding: 25px;
             border-radius: 15px;
             margin: 25px 0;
             text-align: center;
             display: none;
+            border-left: 5px solid #FFD700;
         }
 
         .names-info.show {
@@ -429,30 +536,35 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #3498db, #2980b9);
+            background: #003399;
             color: white;
-            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+            box-shadow: 0 5px 15px rgba(0,51,153,0.3);
+            border: 2px solid #FFD700;
         }
 
         .btn-primary:hover {
+            background: #002277;
             transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4);
+            box-shadow: 0 8px 20px rgba(0,51,153,0.4);
         }
 
         .btn-secondary {
-            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+            background: #666;
             color: white;
+            border: 2px solid #999;
         }
 
         .btn-success {
-            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            background: #003399;
             color: white;
-            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.3);
+            box-shadow: 0 5px 15px rgba(0,51,153,0.3);
+            border: 2px solid #FFD700;
         }
 
         .btn-success:hover {
+            background: #002277;
             transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(46, 204, 113, 0.4);
+            box-shadow: 0 8px 20px rgba(0,51,153,0.4);
         }
 
         .btn-large {
@@ -466,7 +578,7 @@
             justify-content: space-between;
             margin-top: 40px;
             padding-top: 30px;
-            border-top: 2px solid #f1f3f4;
+            border-top: 3px solid #FFD700;
         }
 
         .progress-container {
@@ -474,8 +586,8 @@
             padding: 30px;
             background: white;
             border-radius: 15px;
-            border: 2px solid #e9ecef;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            border: 3px solid #003399;
+            box-shadow: 0 5px 20px rgba(0,51,153,0.1);
             display: none;
         }
 
@@ -485,7 +597,7 @@
 
         .progress-bar {
             height: 25px;
-            background: #ecf0f1;
+            background: #CCD9FF;
             border-radius: 12px;
             overflow: hidden;
             margin-bottom: 20px;
@@ -493,7 +605,7 @@
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #3498db, #2ecc71);
+            background: #003399;
             width: 0%;
             transition: width 0.3s ease;
             border-radius: 12px;
@@ -503,17 +615,18 @@
         .progress-text {
             text-align: center;
             font-size: 1.2rem;
-            color: #2c3e50;
+            color: #003399;
             font-weight: 600;
         }
 
         .result-container {
             text-align: center;
             padding: 50px;
-            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            background: #E6EEFF;
             border-radius: 20px;
             margin: 40px 0;
             display: none;
+            border: 3px solid #FFD700;
         }
 
         .result-container.active {
@@ -523,7 +636,7 @@
 
         .result-container i {
             font-size: 100px;
-            color: #28a745;
+            color: #FFD700;
             margin-bottom: 30px;
             animation: bounce 1s infinite alternate;
         }
@@ -531,6 +644,35 @@
         @keyframes bounce {
             from { transform: translateY(0); }
             to { transform: translateY(-20px); }
+        }
+
+        .file-list {
+            max-height: 200px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: left;
+            font-family: monospace;
+            font-size: 0.9rem;
+            border: 2px solid #003399;
+        }
+
+        .file-list-item {
+            padding: 5px 10px;
+            border-bottom: 1px solid #CCD9FF;
+            color: #003399;
+        }
+
+        .file-list-item i {
+            font-size: 0.9rem;
+            margin-right: 8px;
+            color: #FFD700;
+        }
+
+        .file-list-item:last-child {
+            border-bottom: none;
         }
 
         .alert {
@@ -547,43 +689,54 @@
         }
 
         .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border-left-color: #28a745;
+            background: #E6EEFF;
+            color: #003399;
+            border-left-color: #FFD700;
         }
 
         .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border-left-color: #dc3545;
+            background: #FFE6E6;
+            color: #CC0000;
+            border-left-color: #CC0000;
         }
 
         .alert-warning {
-            background: #fff3cd;
-            color: #856404;
-            border-left-color: #ffc107;
+            background: #FFF3E6;
+            color: #CC7A00;
+            border-left-color: #FFA500;
         }
 
         footer {
             text-align: center;
             padding: 30px;
-            color: #6c757d;
-            background: #f8f9fa;
-            border-top: 1px solid #e9ecef;
+            color: #003399;
+            background: #F0F4FF;
+            border-top: 3px solid #FFD700;
         }
 
         .tips {
-            background: #e3f2fd;
+            background: #E6EEFF;
             padding: 15px;
             border-radius: 10px;
             margin: 20px 0;
             font-size: 0.9rem;
-            color: #1565c0;
+            color: #003399;
+            border-left: 5px solid #FFD700;
         }
 
         .tips i {
-            color: #3498db;
+            color: #FFD700;
             margin-right: 8px;
+        }
+
+        .xoni-badge {
+            display: inline-block;
+            background: #FFD700;
+            color: #003399;
+            padding: 5px 15px;
+            border-radius: 30px;
+            font-weight: bold;
+            margin-top: 10px;
         }
 
         @media (max-width: 768px) {
@@ -597,9 +750,13 @@
             }
             
             header h1 {
-                font-size: 2.2rem;
+                font-size: 2.5rem;
                 flex-direction: column;
                 gap: 10px;
+            }
+            
+            .year-badge {
+                font-size: 1.5rem;
             }
             
             .steps-container {
@@ -612,7 +769,7 @@
             }
             
             .step-indicator.active {
-                border-right-color: #3498db;
+                border-right-color: #FFD700;
                 border-bottom: none;
             }
             
@@ -629,13 +786,14 @@
 <body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-certificate"></i> XONI-DIP</h1>
-            <p class="subtitle">Generador Masivo de Diplomas con Soporte de Tildes</p>
+            <h1><i class="fas fa-certificate"></i> XONIDIP</h1>
+            <div class="year-badge">2026</div>
+            <p class="subtitle">Generador Profesional de Diplomas y Constancias</p>
             <div class="features">
                 <div class="feature"><i class="fas fa-check"></i> Tildes y caracteres especiales</div>
-                <div class="feature"><i class="fas fa-check"></i> Fuentes con estilos</div>
-                <div class="feature"><i class="fas fa-check"></i> Posicionamiento preciso</div>
-                <div class="feature"><i class="fas fa-check"></i> Vista previa en tiempo real</div>
+                <div class="feature"><i class="fas fa-check"></i> Múltiples formatos: PNG, PDF, JPG</div>
+                <div class="feature"><i class="fas fa-check"></i> Nombres de archivo inteligentes</div>
+                <div class="feature feature-highlight"><i class="fas fa-star"></i> Edición 2026</div>
             </div>
         </header>
         
@@ -692,8 +850,8 @@
                 
                 <div class="tips">
                     <i class="fas fa-lightbulb"></i> 
-                    <strong>Tip:</strong> Usa una plantilla de alta calidad para mejores resultados. 
-                    El texto se superpondrá sobre la imagen.
+                    <strong>XONIDIP 2026:</strong> Usa una plantilla de alta calidad para mejores resultados. 
+                    Para PDF, recomendamos imágenes de al menos 150 DPI.
                 </div>
             </div>
             
@@ -835,8 +993,38 @@
                 
                 <div class="tips">
                     <i class="fas fa-info-circle"></i> 
-                    <strong>Importante:</strong> Los nombres con tildes se mostrarán correctamente en los diplomas.
-                    Ejemplos: José María, Ana Sofía, Nicolás, María Fernanda
+                    <strong>XONIDIP 2026:</strong> Los nombres con tildes se mostrarán correctamente en los diplomas y en los nombres de archivo se normalizarán automáticamente.
+                </div>
+                
+                <!-- Selector de formato (se muestra aquí para mejor flujo) -->
+                <div class="preview-container">
+                    <h3><i class="fas fa-file-export"></i> Formato de Salida</h3>
+                    <div class="format-selector">
+                        <div class="format-option active" onclick="selectFormat('PNG')" id="format-PNG">
+                            <i class="fas fa-image"></i>
+                            <h4>PNG</h4>
+                            <p>Alta calidad, fondo transparente</p>
+                        </div>
+                        <div class="format-option" onclick="selectFormat('PDF')" id="format-PDF">
+                            <i class="fas fa-file-pdf"></i>
+                            <h4>PDF</h4>
+                            <p>Formato profesional, listo para imprimir</p>
+                        </div>
+                        <div class="format-option" onclick="selectFormat('JPG')" id="format-JPG">
+                            <i class="fas fa-file-image"></i>
+                            <h4>JPG</h4>
+                            <p>Comprimido, compatible con todo</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Ejemplo de nombres de archivo -->
+                <div class="file-name-example">
+                    <h4><i class="fas fa-file-signature"></i> Los archivos se generarán con este formato:</h4>
+                    <code id="fileNameExample">diploma_Jose_Antonio_Perez_20260315_143022.pdf</code>
+                    <p style="margin-top: 10px; font-size: 0.9rem; color: #003399;">
+                        <i class="fas fa-info-circle"></i> Incluye el nombre completo para fácil identificación
+                    </p>
                 </div>
                 
                 <div style="margin: 25px 0;">
@@ -886,12 +1074,32 @@ Carmen Elena Díaz Fernández"></textarea>
                 
                 <div class="alert" id="alert4"></div>
                 
+                <!-- Resumen de configuración -->
+                <div class="preview-container">
+                    <h3><i class="fas fa-clipboard-list"></i> Resumen de Configuración</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                        <div>
+                            <strong>Formato:</strong> <span id="summaryFormat">PNG</span>
+                        </div>
+                        <div>
+                            <strong>Nombres:</strong> <span id="summaryCount">0</span>
+                        </div>
+                        <div>
+                            <strong>Posición:</strong> <span id="summaryPosition">X:100, Y:100</span>
+                        </div>
+                        <div>
+                            <strong>Fuente:</strong> <span id="summaryFont">Arial 40px</span>
+                        </div>
+                    </div>
+                </div>
+                
                 <div style="text-align: center; margin: 40px 0;">
                     <button class="btn btn-success btn-large" onclick="generateDiplomas()">
-                        <i class="fas fa-play"></i> GENERAR DIPLOMAS
+                        <i class="fas fa-play"></i> GENERAR DIPLOMAS 2026
                     </button>
-                    <p style="margin-top: 15px; color: #666; font-size: 1.1rem;">
+                    <p style="margin-top: 15px; color: #003399; font-size: 1.1rem;">
                         <i class="fas fa-info-circle"></i> Se creará un archivo ZIP con todos los diplomas generados
+                        <br><small>Cada archivo incluirá el nombre del participante</small>
                     </p>
                 </div>
                 
@@ -906,12 +1114,19 @@ Carmen Elena Díaz Fernández"></textarea>
                     <i class="fas fa-check-circle"></i>
                     <h3>¡Diplomas Generados con Éxito!</h3>
                     <p id="resultCount" style="font-size: 1.3rem; margin: 15px 0;">0 diplomas generados</p>
+                    
+                    <!-- Lista de archivos generados -->
+                    <div class="file-list" id="fileList">
+                        <div class="file-list-item"><i class="fas fa-file-pdf"></i> diploma_Jose_Antonio_Perez.pdf</div>
+                        <div class="file-list-item"><i class="fas fa-file-pdf"></i> diploma_Maria_Fernanda_Garcia.pdf</div>
+                    </div>
+                    
                     <div style="margin-top: 30px;">
                         <a class="btn btn-primary btn-large" id="downloadBtn" href="#" target="_blank">
-                            <i class="fas fa-download"></i> DESCARGAR ARCHIVO ZIP
+                            <i class="fas fa-download"></i> DESCARGAR ZIP
                         </a>
                         <button class="btn btn-secondary" onclick="restartProcess()" style="margin-top: 15px;">
-                            <i class="fas fa-redo"></i> Generar Más Diplomas
+                            <i class="fas fa-redo"></i> Nuevos Diplomas
                         </button>
                     </div>
                 </div>
@@ -925,8 +1140,9 @@ Carmen Elena Díaz Fernández"></textarea>
         </div>
         
         <footer>
-            <p><strong>XONI-DIP v3.0</strong> - Generador Masivo de Diplomas con Soporte Completo de Tildes</p>
-            <p>© 2024 - Sistema optimizado para nombres en español</p>
+            <p><strong>XONIDIP 2026</strong> - Generador Profesional de Diplomas y Constancias</p>
+            <p>© 2026 - Formatos profesionales: PNG, PDF, JPG | Nombres de archivo inteligentes</p>
+            <div class="xoni-badge">XONIDIP v4.0 - Edición 2026</div>
         </footer>
     </div>
     
@@ -944,6 +1160,7 @@ Carmen Elena Díaz Fernández"></textarea>
             align_type: 'manual'
         };
         let names = [];
+        let selectedFormat = 'PNG'; // Formato por defecto
         
         // Inicializar cuando el DOM esté listo
         document.addEventListener('DOMContentLoaded', function() {
@@ -972,6 +1189,7 @@ Carmen Elena Díaz Fernández"></textarea>
                 textConfig.x = value;
                 positionXInput.value = value;
                 document.getElementById('positionXValue').textContent = value + ' px';
+                updateSummary();
                 updatePositionPreview();
             });
             
@@ -980,6 +1198,7 @@ Carmen Elena Díaz Fernández"></textarea>
                 textConfig.x = value;
                 positionX.value = value;
                 document.getElementById('positionXValue').textContent = value + ' px';
+                updateSummary();
                 updatePositionPreview();
             });
             
@@ -988,6 +1207,7 @@ Carmen Elena Díaz Fernández"></textarea>
                 textConfig.y = value;
                 positionYInput.value = value;
                 document.getElementById('positionYValue').textContent = value + ' px';
+                updateSummary();
                 updatePositionPreview();
             });
             
@@ -996,6 +1216,7 @@ Carmen Elena Díaz Fernández"></textarea>
                 textConfig.y = value;
                 positionY.value = value;
                 document.getElementById('positionYValue').textContent = value + ' px';
+                updateSummary();
                 updatePositionPreview();
             });
             
@@ -1004,6 +1225,7 @@ Carmen Elena Díaz Fernández"></textarea>
                 textConfig.font_size = value;
                 fontSizeInput.value = value;
                 document.getElementById('fontSizeValue').textContent = value + ' px';
+                updateSummary();
                 updatePositionPreview();
             });
             
@@ -1012,6 +1234,7 @@ Carmen Elena Díaz Fernández"></textarea>
                 textConfig.font_size = value;
                 fontSize.value = value;
                 document.getElementById('fontSizeValue').textContent = value + ' px';
+                updateSummary();
                 updatePositionPreview();
             });
             
@@ -1042,20 +1265,56 @@ Carmen Elena Díaz Fernández"></textarea>
                     }
                 }
                 
+                updateSummary();
                 updatePositionPreview();
             });
+            
+            // Actualizar resumen inicial
+            updateSummary();
             
             // Nombres de ejemplo con tildes
             document.getElementById('namesText').value = `José Antonio Pérez González
 María Fernanda García López
 Carlos Andrés Rodríguez Martínez
 Ana Sofía Fernández Sánchez
-Pedro Nicolás Martínez Díaz
+Darian Alberto Camacho Salas
 Laura Isabel Sánchez Pérez
 Miguel Ángel López González
 Isabel Cristina González Rodríguez
 David Alejandro Hernández Martín
 Carmen Elena Díaz Fernández`;
+        }
+        
+        // Seleccionar formato
+        function selectFormat(format) {
+            selectedFormat = format;
+            
+            // Actualizar UI
+            document.querySelectorAll('.format-option').forEach(opt => {
+                opt.classList.remove('active');
+            });
+            document.getElementById(`format-${format}`).classList.add('active');
+            
+            // Actualizar ejemplo
+            const extension = format.toLowerCase();
+            document.getElementById('fileNameExample').textContent = 
+                `diploma_Jose_Antonio_Perez_20260315_143022.${extension}`;
+            
+            updateSummary();
+        }
+        
+        // Actualizar resumen
+        function updateSummary() {
+            document.getElementById('summaryFormat').textContent = selectedFormat;
+            document.getElementById('summaryCount').textContent = names.length;
+            document.getElementById('summaryPosition').textContent = `X:${textConfig.x}, Y:${textConfig.y}`;
+            
+            let fontName = 'Arial';
+            if (textConfig.font_name.includes('times')) fontName = 'Times New Roman';
+            if (textConfig.font_name.includes('cour')) fontName = 'Courier New';
+            
+            document.getElementById('summaryFont').textContent = 
+                `${fontName} ${textConfig.font_size}px ${textConfig.font_style}`;
         }
         
         // Manejar subida de plantilla
@@ -1069,7 +1328,7 @@ Carmen Elena Díaz Fernández`;
             
             uploadArea.innerHTML = `
                 <div style="text-align: center;">
-                    <i class="fas fa-spinner fa-spin fa-3x" style="color: #3498db;"></i>
+                    <i class="fas fa-spinner fa-spin fa-3x" style="color: #003399;"></i>
                     <h3 style="margin-top: 20px;">Subiendo plantilla...</h3>
                     <p>Por favor espera unos segundos</p>
                 </div>
@@ -1251,6 +1510,7 @@ Carmen Elena Díaz Fernández`;
             summary.classList.add('show');
             
             showAlert(alert, `✅ ${names.length} nombres procesados correctamente (tildes incluidas)`, 'success');
+            updateSummary();
         }
         
         // Navegación entre pasos
@@ -1290,6 +1550,10 @@ Carmen Elena Díaz Fernández`;
             // Acciones específicas por paso
             if (step === 2 && templateData) {
                 updatePositionPreview();
+            }
+            
+            if (step === 4) {
+                updateSummary();
             }
         }
         
@@ -1334,7 +1598,8 @@ Carmen Elena Díaz Fernández`;
                     body: JSON.stringify({
                         template_path: templateData.filepath,
                         names: names,
-                        text_config: textConfig
+                        text_config: textConfig,
+                        output_format: selectedFormat
                     })
                 });
                 
@@ -1357,7 +1622,15 @@ Carmen Elena Díaz Fernández`;
                                 progressContainer.classList.remove('active');
                                 
                                 document.getElementById('resultCount').textContent = 
-                                    `${data.count} diplomas generados con tildes incluidas`;
+                                    `${data.count} diplomas generados en formato ${selectedFormat}`;
+                                
+                                // Mostrar lista de archivos
+                                const fileList = document.getElementById('fileList');
+                                if (data.files && data.files.length > 0) {
+                                    fileList.innerHTML = data.files.map(f => 
+                                        `<div class="file-list-item"><i class="fas fa-file-${selectedFormat.toLowerCase()}"></i> ${f}</div>`
+                                    ).join('');
+                                }
                                 
                                 const downloadBtn = document.getElementById('downloadBtn');
                                 downloadBtn.href = data.download_url;
@@ -1365,7 +1638,7 @@ Carmen Elena Díaz Fernández`;
                                 
                                 resultContainer.classList.add('active');
                                 
-                                showAlert(alert, '✅ Diplomas generados exitosamente (tildes incluidas)', 'success');
+                                showAlert(alert, `✅ ${data.count} diplomas generados exitosamente en formato ${selectedFormat}`, 'success');
                                 
                             }, 1000);
                         } else {
@@ -1400,7 +1673,6 @@ Carmen Elena Díaz Fernández`;
             `;
             document.getElementById('templateFile').value = '';
             document.getElementById('namesSummary').classList.remove('show');
-            document.getElementById('namesText').value = '';
             
             // Resetear configuraciones
             textConfig = {
@@ -1438,6 +1710,13 @@ Carmen Elena Díaz Fernández`;
             });
             document.querySelectorAll('.position-btn')[4].classList.add('active');
             
+            // Resetear formato
+            selectedFormat = 'PNG';
+            document.querySelectorAll('.format-option').forEach(opt => {
+                opt.classList.remove('active');
+            });
+            document.getElementById('format-PNG').classList.add('active');
+            
             // Resetear pasos
             document.querySelectorAll('.step-indicator').forEach(indicator => {
                 indicator.classList.remove('active');
@@ -1451,6 +1730,8 @@ Carmen Elena Díaz Fernández`;
             document.getElementById('step1').classList.add('active');
             document.getElementById('step1-indicator').classList.add('active');
             currentStep = 1;
+            
+            updateSummary();
         }
         
         // Mostrar alerta
