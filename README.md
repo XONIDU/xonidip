@@ -1,6 +1,5 @@
 ## 📁 **README.md (VERSIÓN SIMPLIFICADA)**
 
-```markdown
 # 🎓 XONIDIP 2026 - Generador de Diplomas
 
 **Desarrollado por:** Darian Alberto Camacho Salas
@@ -134,4 +133,3 @@ app.run(port=5001)
 5. **Comandos cortos** - Fáciles de copiar/pegar
 6. **Sin secciones extensas** - Directo al punto
 
-¿Quieres que ajuste algo más?
