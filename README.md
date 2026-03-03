@@ -1,6 +1,4 @@
-## 📁 **README.md (VERSIÓN SIMPLIFICADA)**
-
-# 🎓 XONIDIP 2026 - Generador de Diplomas
+# 🎓 XONIDIP 2026 - Generador de Diplomas v4.2.0
 
 **Desarrollado por:** Darian Alberto Camacho Salas
 
