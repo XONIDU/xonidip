@@ -149,8 +149,3 @@ También puedes descargarlos como archivo ZIP desde la interfaz web.
 
 ---
 
-
-#🎓 XONIDIP 2026 v4.2.0
-#Herramienta educativa de automatización
-#Desarrollado por Darian Alberto Camacho Salas
-#2026 - Todos los derechos reservados para fines educativos
