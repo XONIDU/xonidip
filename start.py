@@ -24,6 +24,8 @@ app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['OUTPUT_FOLDER'] = 'diplomas_generados'
 app.config['FONTS_FOLDER'] = 'fonts'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'txt', 'csv', 'xlsx', 'xls'}
+app.config['OUTPUT_FORMATS'] = ['PNG', 'PDF', 'JPG']
+app.config['DEFAULT_FORMAT'] = 'PNG'
 
 # Crear carpetas si no existen
 for folder in [app.config['UPLOAD_FOLDER'], app.config['OUTPUT_FOLDER'], app.config['FONTS_FOLDER']]:
@@ -63,6 +65,66 @@ def generate_qr_base64(url):
     except Exception as e:
         print(f"Error generando QR: {e}")
         return None
+
+# ===== FUNCIÓN PARA NORMALIZAR NOMBRES DE ARCHIVO =====
+def normalize_filename(name):
+    """Normaliza un nombre para uso en nombre de archivo"""
+    # Reemplazar caracteres especiales
+    replacements = {
+        'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u',
+        'Á': 'A', 'É': 'E', 'Í': 'I', 'Ó': 'O', 'Ú': 'U',
+        'ñ': 'n', 'Ñ': 'N', 'ü': 'u', 'Ü': 'U',
+        ' ': '_', ',': '', '.': '', "'": '', '"': '',
+        '¿': '', '?': '', '¡': '', '!': '', ':': '', ';': '',
+        '/': '_', '\\': '_', '*': '', '|': '', '<': '', '>': ''
+    }
+    
+    for special, normal in replacements.items():
+        name = name.replace(special, normal)
+    
+    # Eliminar caracteres no permitidos
+    name = ''.join(c for c in name if c.isalnum() or c in ('_', '-'))
+    
+    # Limitar longitud y evitar nombres vacíos
+    name = name[:50] if name else "participante"
+    
+    return name
+
+# ===== FUNCIÓN PARA GUARDAR EN DIFERENTES FORMATOS =====
+def save_diploma(image, name, output_format='PNG'):
+    """Guarda el diploma en el formato especificado con nombre personalizado"""
+    
+    safe_name = normalize_filename(name)
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    
+    if output_format.upper() == 'PDF':
+        # Generar PDF
+        output_filename = f"diploma_{safe_name}_{timestamp}.pdf"
+        output_path = os.path.join(app.config['OUTPUT_FOLDER'], output_filename)
+        
+        # Convertir imagen a PDF
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
+        
+        image.save(output_path, 'PDF', resolution=100.0)
+        
+    elif output_format.upper() == 'JPG':
+        # Generar JPG
+        output_filename = f"diploma_{safe_name}_{timestamp}.jpg"
+        output_path = os.path.join(app.config['OUTPUT_FOLDER'], output_filename)
+        
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
+        
+        image.save(output_path, 'JPEG', quality=95, optimize=True)
+        
+    else:  # PNG por defecto
+        output_filename = f"diploma_{safe_name}_{timestamp}.png"
+        output_path = os.path.join(app.config['OUTPUT_FOLDER'], output_filename)
+        
+        image.save(output_path, 'PNG', optimize=True)
+    
+    return output_filename, output_path
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -392,6 +454,7 @@ def generate_diplomas():
         template_path = data.get('template_path')
         names = data.get('names', [])
         text_config = data.get('text_config', {})
+        output_format = data.get('output_format', app.config['DEFAULT_FORMAT'])
         
         if not template_path or not os.path.exists(template_path):
             return jsonify({'error': 'Plantilla no encontrada'}), 400
@@ -414,6 +477,7 @@ def generate_diplomas():
         
         temp_dir = tempfile.mkdtemp()
         generated_files = []
+        file_mapping = {}  # Para mapear nombre original -> archivo generado
         
         try:
             base_template = Image.open(template_path)
@@ -435,13 +499,17 @@ def generate_diplomas():
                 # Dibujar texto centrado
                 draw.text((x, y), name, font=font, fill=font_color)
                 
-                safe_name = ''.join(c for c in name if c.isalnum() or c in (' ', '-', '_', 'ñ', 'Ñ', 'á', 'é', 'í', 'ó', 'ú', 'Á', 'É', 'Í', 'Ó', 'Ú'))[:50]
-                output_filename = f"diploma_{i+1:04d}_{safe_name}.jpg"
-                output_path = os.path.join(temp_dir, output_filename)
-                img.save(output_path, 'JPEG', quality=95)
-                generated_files.append(output_filename)
+                # Guardar con nombre personalizado en el formato seleccionado
+                output_filename, output_path = save_diploma(img, name, output_format)
                 
-                shutil.copy2(output_path, os.path.join(app.config['OUTPUT_FOLDER'], output_filename))
+                # También guardar en temp_dir para el ZIP
+                temp_path = os.path.join(temp_dir, output_filename)
+                shutil.copy2(output_path, temp_path)
+                
+                generated_files.append(output_filename)
+                file_mapping[output_filename] = name
+                
+                print(f"✓ Generado: {output_filename}")
             
             except Exception as e:
                 print(f"⚠ Error con {name}: {e}")
@@ -450,34 +518,39 @@ def generate_diplomas():
         if not generated_files:
             return jsonify({'error': 'No se generó ningún diploma'}), 500
         
+        # Crear archivo ZIP con todos los diplomas
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         zip_filename = f'diplomas_{timestamp}.zip'
         zip_path = os.path.join(app.config['OUTPUT_FOLDER'], zip_filename)
         
-        with zipfile.ZipFile(zip_path, 'w') as zipf:
+        with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
             for filename in generated_files:
-                file_path = os.path.join(app.config['OUTPUT_FOLDER'], filename)
+                file_path = os.path.join(temp_dir, filename)
                 if os.path.exists(file_path):
                     zipf.write(file_path, filename)
         
-        for filename in generated_files:
-            file_path = os.path.join(app.config['OUTPUT_FOLDER'], filename)
-            if os.path.exists(file_path):
-                try:
-                    os.remove(file_path)
-                except:
-                    pass
-        
+        # Limpiar archivos temporales
         try:
             shutil.rmtree(temp_dir)
         except:
             pass
         
+        # Limpiar archivos individuales (opcional - mantenerlos o eliminarlos)
+        for filename in generated_files:
+            file_path = os.path.join(app.config['OUTPUT_FOLDER'], filename)
+            if os.path.exists(file_path):
+                try:
+                    os.remove(file_path)  # Eliminar individuales, solo mantener el ZIP
+                except:
+                    pass
+        
         return jsonify({
             'success': True,
             'zip_file': zip_filename,
             'count': len(generated_files),
-            'download_url': url_for('download_file', filename=zip_filename)
+            'download_url': url_for('download_file', filename=zip_filename),
+            'format': output_format,
+            'files': generated_files[:5]  # Mostrar primeros 5 como ejemplo
         })
         
     except Exception as e:
@@ -575,45 +648,50 @@ def get_available_fonts_api():
     
     return jsonify({'fonts': available_fonts})
 
+@app.route('/get-output-formats', methods=['GET'])
+def get_output_formats():
+    """Devuelve los formatos de salida disponibles"""
+    return jsonify({
+        'formats': app.config['OUTPUT_FORMATS'],
+        'default': app.config['DEFAULT_FORMAT']
+    })
+
 if __name__ == '__main__':
     server_url = get_server_url()
     
     print("=" * 70)
-    print("🎓 XONI-DIP - GENERADOR MASIVO DE DIPLOMAS (CENTRADO) 🎓")
+    print("XONIDIP - GENERADOR MASIVO DE DIPLOMAS (MEJORADO) 🎓")
     print("=" * 70)
+    print("\n✅ NUEVAS CARACTERÍSTICAS:")
+    print("   • Formatos de salida: PNG, PDF, JPG")
+    print("   • Nombres de archivo personalizados: diploma_Nombre_Apellido.pdf")
+    print("   • Soporte mejorado para tildes y caracteres especiales")
     
     fonts_folder = app.config['FONTS_FOLDER']
     if not os.path.exists(fonts_folder):
         os.makedirs(fonts_folder)
-        print(f"📁 Carpeta 'fonts' creada en: {os.path.abspath(fonts_folder)}")
-        print("💡 Copia archivos .ttf a esta carpeta para más opciones de fuentes")
+        print(f"\nCarpeta 'fonts' creada en: {os.path.abspath(fonts_folder)}")
+        print("Copia archivos .ttf a esta carpeta para más opciones de fuentes")
     
-    print("\n🔍 Verificando fuentes disponibles...")
+    print("\nVerificando fuentes disponibles...")
     
-    print(f"\n🌐 ACCESO DESDE CUALQUIER DISPOSITIVO:")
+    print(f"\nACCESO DESDE CUALQUIER DISPOSITIVO:")
     print(f"   • {server_url}")
     
     try:
         qr_ascii = qrcode.QRCode()
         qr_ascii.add_data(server_url)
-        print("\n📱 Escanea este código QR desde tu teléfono:")
+        print("\nEscanea este código QR desde tu teléfono:")
         print("-" * 50)
         qr_ascii.print_ascii()
         print("-" * 50)
     except:
         pass
     
-    print("Somos XONIDU\nDarian Alberto Camacho Salas")    
-    print(f"\n🚀 Para comenzar:")
-    print(f"   1. Abre {server_url} en tu navegador")
-    print(f"   2. O escanea el QR desde tu teléfono")
-    print(f"   3. Sube una plantilla de diploma")
-    print(f"   4. Configura la posición (AHORA ES EL CENTRO DEL TEXTO)")
-    print(f"   5. Ingresa los nombres con tildes")
-    print(f"   6. ¡Genera y descarga!")
-    print("\n✅ NUEVO: La posición configurada es el CENTRO del nombre")
-    print("✅ El texto se expande simétricamente a los lados")
     print("\n" + "=" * 70)
+    print("XONIDU - Darian Alberto Camacho Salas")
+    print("Servidor iniciado correctamente")
+    print("=" * 70)
     
     app.run(
         debug=True,
