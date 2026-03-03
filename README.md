@@ -122,7 +122,6 @@ app.run(port=5001)
 ---
 
 **XONIDIP 2026** - Herramienta educativa de automatización
-```
 
 ## 📝 **Cambios realizados:**
 
