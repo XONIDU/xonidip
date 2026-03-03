@@ -97,22 +97,6 @@ Todos los diplomas generados se guardan en la carpeta:
 /diplomas_generados/
 ```
 
-## 🔧 Solución de problemas comunes
-
-**Error: "No module named 'PIL'"**
-```bash
-pip install Pillow
-```
-
-**Error: Puerto 5000 en uso**
-- Edita `start.py` y cambia el puerto:
-```python
-app.run(port=5001)
-```
-
-**Fuentes no visibles**
-- Copia archivos `.ttf` a la carpeta `fonts/`
-
 ## 📞 Contacto
 
 - 📸 **Instagram:** @xonidu
@@ -124,11 +108,4 @@ app.run(port=5001)
 **XONIDIP 2026** - Herramienta educativa de automatización
 
 ## 📝 **Cambios realizados:**
-
-1. **Estructura simplificada** - Solo lo esencial
-2. **Instalación por sistema** - Linux, macOS, Windows con comandos claros
-3. **Carpeta `diplomas_generados`** - Destacada como lugar de salida
-4. **Archivo `start.py`** - Mencionado como archivo principal
-5. **Comandos cortos** - Fáciles de copiar/pegar
-6. **Sin secciones extensas** - Directo al punto
 
