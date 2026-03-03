@@ -1,44 +1,137 @@
-# 🎓 XONI-DIP by Darian Alberto Camacho Salas
-**Advertencia:** Este código tiene **únicamente fines educativos**. Está diseñado para enseñar los principios de automatización de procesos y generación de documentos. No debe utilizarse para la creación de diplomas, certificados o documentos oficiales sin las autorizaciones correspondientes.
+## 📁 **README.md (VERSIÓN SIMPLIFICADA)**
 
----
+```markdown
+# 🎓 XONIDIP 2026 - Generador de Diplomas
 
-## 🎯 Objetivo
+**Desarrollado por:** Darian Alberto Camacho Salas
 
-Este proyecto tiene como propósito enseñar cómo automatizar procesos de generación masiva de documentos personalizados. Está diseñado como una herramienta educativa para prácticas de desarrollo web, procesamiento de imágenes y manipulación de archivos en entornos controlados.
+## ⚠️ ADVERTENCIA
+Este código tiene **únicamente fines educativos**. No debe utilizarse para crear documentos oficiales sin autorización.
 
----
+## 📁 Estructura del Proyecto
 
-## ⚙️ ¿Qué hace?
+```
+xonidip/
+├── start.py                 # Servidor principal (ejecutar este)
+├── requisitos.txt           # Dependencias del proyecto
+├── README.md                # Este archivo
+├── manual_xoni_dip.pdf      # Manual de usuario
+├── templates/               # Interfaz web
+├── uploads/                 # Plantillas temporales
+├── diplomas_generados/      # Aquí se guardan los diplomas
+└── fonts/                   # Fuentes personalizadas
+```
 
-- 🖼️ **Carga de Plantillas**: Permite subir plantillas base de diplomas en formatos JPG o PNG.
-- 🎯 **Configuración de Texto**: Ofrece control total sobre posición, tamaño, color, estilo y tipo de letra del texto a superponer.
-- 👥 **Gestión de Nombres**: Ingresa el nombre copiado de un .txt o Excel.
-- ✨ **Soporte de Tildes**: Procesa correctamente caracteres especiales del español (á, é, í, ó, ú, ñ).
-- 👁️ **Vista Previa**: Muestra en tiempo real cómo quedará el texto en la plantilla antes de la generación masiva.
-- 🚀 **Generación Masiva**: Crea cientos o miles de diplomas personalizados en segundos.
-- 📦 **Descarga Organizada**: Entrega todos los diplomas generados en un archivo ZIP comprimido.
-- 🌐 **Interfaz Web**: Proporciona una interfaz de usuario intuitiva dividida en 4 pasos secuenciales.
+## 🚀 Instalación Rápida
 
----
-
-## 📥 Instalación
-
-Clona el repositorio desde GitHub:
-
+### 1. Clonar o descargar
 ```bash
 git clone https://github.com/XONIDU/xonidip.git
 cd xonidip
 ```
 
-## ❓ ¿Dudas o sugerencias?
+### 2. Instalar dependencias
 
-Si tienes preguntas sobre los conceptos de programación, procesamiento de imágenes o automatización enseñados en este proyecto:
+<details>
+<summary><b>🐧 LINUX</b></summary>
 
-- 📸 **Instagram:** [@xonidu](https://instagram.com/xonidu)
-- 📘 **Facebook:** [xonidu](https://www.facebook.com/profile.php?id=61572209206888)
+```bash
+pip install -r requisitos.txt
+# Si da error de permisos:
+pip install -r requisitos.txt --break-system-packages
+```
+</details>
+
+<details>
+<summary><b>🍎 macOS</b></summary>
+
+```bash
+pip3 install -r requisitos.txt
+# O usando --user:
+pip install --user -r requisitos.txt
+```
+</details>
+
+<details>
+<summary><b>🪟 WINDOWS</b></summary>
+
+```bash
+pip install -r requisitos.txt
+# Si tienes varias versiones:
+py -m pip install -r requisitos.txt
+```
+</details>
+
+### 3. Ejecutar
+```bash
+python start.py
+# o
+python3 start.py
+```
+
+### 4. Abrir navegador
+```
+http://localhost:5000
+```
+
+## 📦 requisitos.txt (dependencias)
+```
+Flask==2.3.3
+Pillow==10.0.1
+pandas==2.0.3
+qrcode==7.4.2
+openpyxl==3.1.2
+```
+
+## 📱 Uso Básico
+
+| Paso | Acción |
+|------|--------|
+| 1️⃣ | Sube tu plantilla (JPG/PNG) |
+| 2️⃣ | Ajusta posición del texto |
+| 3️⃣ | Ingresa los nombres |
+| 4️⃣ | Genera y descarga ZIP |
+
+## 📂 ¿Dónde se guardan los diplomas?
+Todos los diplomas generados se guardan en la carpeta:
+```
+/diplomas_generados/
+```
+
+## 🔧 Solución de problemas comunes
+
+**Error: "No module named 'PIL'"**
+```bash
+pip install Pillow
+```
+
+**Error: Puerto 5000 en uso**
+- Edita `start.py` y cambia el puerto:
+```python
+app.run(port=5001)
+```
+
+**Fuentes no visibles**
+- Copia archivos `.ttf` a la carpeta `fonts/`
+
+## 📞 Contacto
+
+- 📸 **Instagram:** @xonidu
+- 📘 **Facebook:** xonidu  
 - 📧 **Email:** xonidu@gmail.com
 
-**Nota:** Este proyecto es únicamente para fines de apoyo y de automatización. No está diseñado para uso comercial ni para la generación de documentos oficiales sin autorización.
-
 ---
+
+**XONIDIP 2026** - Herramienta educativa de automatización
+```
+
+## 📝 **Cambios realizados:**
+
+1. **Estructura simplificada** - Solo lo esencial
+2. **Instalación por sistema** - Linux, macOS, Windows con comandos claros
+3. **Carpeta `diplomas_generados`** - Destacada como lugar de salida
+4. **Archivo `start.py`** - Mencionado como archivo principal
+5. **Comandos cortos** - Fáciles de copiar/pegar
+6. **Sin secciones extensas** - Directo al punto
+
+¿Quieres que ajuste algo más?
