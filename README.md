@@ -9,7 +9,8 @@ Este código tiene **únicamente fines educativos**. No debe utilizarse para cre
 
 ```
 xonidip/
-├── start.py                 # Servidor principal (ejecutar este)
+├── start.py                 # Servidor principal
+├── xonidip.py               # LANZADOR AUTOMÁTICO (¡USA ESTE!)
 ├── requisitos.txt           # Dependencias del proyecto
 ├── README.md                # Este archivo
 ├── manual_xoni_dip.pdf      # Manual de usuario
@@ -19,134 +20,147 @@ xonidip/
 └── fonts/                   # Fuentes personalizadas
 ```
 
-## 🚀 Instalación Rápida
+## 🚀 **NOVEDAD: XONIDIP.PY - LANZADOR AUTOMÁTICO**
 
-### 1. Clonar o descargar
+Hemos creado un **lanzador automático** llamado `xonidip.py` que:
+
+✅ **INSTALA** todas las dependencias por ti  
+✅ **VERIFICA** que Python esté instalado  
+✅ **EJECUTA** el servidor automáticamente  
+✅ **ABRE** el navegador en la página correcta  
+✅ **SOLO UN CLIC** y todo funciona  
+
+## 🪟 **PARA WINDOWS - ASÍ DE FÁCIL**
+
+### **OPCIÓN 1: LA MÁS FÁCIL (RECOMENDADA)**
+
 ```bash
-git clone https://github.com/XONIDU/xonidip.git
-cd xonidip
+# 1. Abre PowerShell o CMD en la carpeta del proyecto
+# 2. Escribe esto y presiona ENTER:
+
+python xonidip.py
 ```
 
-### 2. Instalar dependencias
+### **OPCIÓN 2: DOBLE CLIC (MÁS FÁCIL AÚN)**
 
-<details>
-<summary><b>🐧 LINUX</b></summary>
+1. Abre la carpeta donde descargaste XONIDIP
+2. Haz **doble clic** en el archivo `xonidip.py`
+3. ¡Listo! Se abrirá automáticamente en tu navegador
+
+### **OPCIÓN 3: INSTALACIÓN MANUAL (SI PREFIERES)**
 
 ```bash
-# Instalación normal
+# Paso 1: Instalar dependencias
 pip install -r requisitos.txt
 
-# Si da error de permisos del sistema (recomendado para Linux)
-pip install -r requisitos.txt --break-system-packages
-
-# O usando pipx (alternativa)
-pipx install flask pillow pandas qrcode openpyxl
-```
-</details>
-
-<details>
-<summary><b>🍎 macOS</b></summary>
-
-```bash
-# Instalación normal
-pip3 install -r requisitos.txt
-
-# Si usas Python 3 por defecto
-pip install -r requisitos.txt
-
-# Para evitar problemas de permisos
-pip install --user -r requisitos.txt
-```
-</details>
-
-<details>
-<summary><b>🪟 WINDOWS</b></summary>
-
-```bash
-# Instalación normal
-pip install -r requisitos.txt
-
-# Si tienes varias versiones de Python
-py -m pip install -r requisitos.txt
-
-# En PowerShell
-python -m pip install -r requisitos.txt
-```
-</details>
-
-### 3. Verificar instalación
-```bash
-# Listar paquetes instalados
-pip list
-
-# Deberías ver: Flask, Pillow, pandas, qrcode, openpyxl
-```
-
-### 4. Ejecutar
-```bash
+# Paso 2: Ejecutar el servidor
 python start.py
-# o
+
+# Paso 3: Abrir navegador
+# Ve a: http://localhost:5000
+```
+
+## 🐧 **PARA LINUX - ASÍ DE FÁCIL**
+
+```bash
+# Paso 1: Entrar a la carpeta
+cd xonidip
+
+# Paso 2: Dar permisos al lanzador (solo primera vez)
+chmod +x xonidip.py
+
+# Paso 3: Ejecutar el lanzador (con --break-system-packages)
+python3 xonidip.py --break-system-packages
+
+# O si prefieres instalar manualmente:
+pip install -r requisitos.txt --break-system-packages
 python3 start.py
 ```
 
-### 5. Abrir navegador
-```
-http://localhost:5000
+## 🍎 **PARA macOS - ASÍ DE FÁCIL**
+
+```bash
+# Paso 1: Entrar a la carpeta
+cd xonidip
+
+# Paso 2: Ejecutar el lanzador
+python3 xonidip.py
+
+# O manualmente:
+pip3 install -r requisitos.txt
+python3 start.py
 ```
 
-## 📦 requisitos.txt (dependencias)
-```
-Flask==2.3.3
-Pillow==10.0.1
-pandas==2.0.3
-qrcode==7.4.2
-openpyxl==3.1.2
-```
+## 📱 **CÓMO USARLO (EN 4 PASOS)**
 
-## 📱 Uso Básico
-
-| Paso | Acción | Descripción |
-|------|--------|-------------|
-| 1️⃣ | **Subir plantilla** | Selecciona tu diploma base (JPG/PNG) |
-| 2️⃣ | **Ajustar posición** | Coloca el texto donde quieras |
+| Paso | Qué hacer | Descripción |
+|------|-----------|-------------|
+| 1️⃣ | **Subir plantilla** | Elige tu diploma (JPG o PNG) |
+| 2️⃣ | **Ajustar posición** | Pon el texto donde quieras |
 | 3️⃣ | **Ingresar nombres** | Escribe un nombre por línea |
-| 4️⃣ | **Generar** | Crea todos los diplomas y descarga ZIP |
+| 4️⃣ | **Generar** | ¡Crea todos y descarga ZIP! |
 
-## 📂 ¿Dónde se guardan los diplomas?
-
-Todos los diplomas generados se guardan automáticamente en la carpeta:
+## 📂 **¿DÓNDE ESTÁN MIS DIPLOMAS?**
+Dentro de la carpeta:
 ```
 /diplomas_generados/
 ```
+(Puedes copiarlos, enviarlos por email, imprimirlos...)
 
-También puedes descargarlos como archivo ZIP desde la interfaz web.
+## 🔧 **PROBLEMAS COMUNES (Y SOLUCIONES)**
 
-## 🔧 Solución de problemas comunes
+### ❌ "No module named 'Flask'"
+```bash
+# SOLUCIÓN: Instala las dependencias
+pip install -r requisitos.txt
 
-| Problema | Solución |
-|----------|----------|
-| **No module named 'Flask'** | Ejecuta: `pip install -r requisitos.txt` |
-| **Error de permisos** | Usa: `pip install --user -r requisitos.txt` |
-| **Puerto 5000 en uso** | Edita `start.py` y cambia a `port=5001` |
-| **Fuentes no visibles** | Copia archivos `.ttf` a la carpeta `fonts/` |
-| **No se ven las tildes** | Asegúrate que el archivo de nombres esté en UTF-8 |
+# En Linux (si da error):
+pip install -r requisitos.txt --break-system-packages
+```
 
-## 📞 Contacto y Soporte
+### ❌ "Error de permisos"
+```bash
+# SOLUCIÓN LINUX:
+pip install -r requisitos.txt --break-system-packages
 
-¿Dudas sobre instalación o uso?
+# SOLUCIÓN MAC:
+pip install --user -r requisitos.txt
+```
 
-- 📸 **Instagram:** [@xonidu](https://instagram.com/xonidu)
+### ❌ "Puerto 5000 en uso"
+```bash
+# SOLUCIÓN: Abre start.py y cambia el puerto (línea final):
+app.run(port=5001)
+
+# Luego ve a: http://localhost:5001
+```
+
+### ❌ "No se ven las tildes"
+**SOLUCIÓN:** Guarda tu archivo de nombres en UTF-8 (el bloc de notas ya lo hace por defecto)
+
+## 📞 ¿NECITAS AYUDA?
+
+- 📸 **Instagram:** @xonidu
 - 📧 **Email:** xonidu@gmail.com
-- 💻 **GitHub:** [XONIDU/xonidip](https://github.com/XONIDU/xonidip)
+- 💻 **GitHub:** XONIDU/xonidip
 
-## 📋 Notas adicionales
+## ✅ COSAS QUE PUEDES HACER
 
-- ✅ Funciona en cualquier sistema operativo con Python 3.8+
-- ✅ Soporta tildes y caracteres especiales (á, é, í, ó, ú, ñ)
-- ✅ Puedes usar Excel, CSV o TXT para los nombres
-- ✅ Los diplomas se generan en PNG, PDF o JPG
-- ✅ Cada archivo incluye el nombre del participante
+| Sí | No |
+|----|----|
+| ✅ Generar diplomas para tu curso | ❌ Crear documentos falsos |
+| ✅ Aprender a automatizar | ❌ Usarlo sin permiso |
+| ✅ Probar con nombres inventados | ❌ Vender los diplomas |
+| ✅ Compartir el código | ❌ Quitar los créditos |
+
+## 🎉 ¡Y LISTO!
+
+```
+╔════════════════════════════════════╗
+║   XONIDIP 2026 - Hecho con ❤️      ║
+║   por Darian Alberto Camacho Salas ║
+╚════════════════════════════════════╝
+```
 
 ---
 
-## SOMOS XONIDU
