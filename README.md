@@ -127,7 +127,6 @@ app.run(port=5001)
 
 - ✅ Funciona en **Windows, Linux y Mac** con Python 3.8+
 - ✅ Soporta **tildes y caracteres especiales** (á, é, í, ó, ú, ñ)
-- ✅ Puedes usar **Excel, CSV o TXT** para los nombres
 - ✅ Los diplomas se generan en **PNG, PDF o JPG**
 - ✅ Cada archivo incluye el **nombre del participante**
 
