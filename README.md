@@ -9,8 +9,8 @@ Este código tiene **únicamente fines educativos**. No debe utilizarse para cre
 
 ```
 xonidip/
-├── start.py                 # Servidor principal
-├── xonidip.py               # LANZADOR AUTOMÁTICO (¡USA ESTE!)
+├── start.py                 # 🟢 LANZADOR UNIVERSAL (¡SOLO EJECUTA ESTE!)
+├── xonidip.py               # 🔵 PROGRAMA PRINCIPAL (servidor Flask)
 ├── requisitos.txt           # Dependencias del proyecto
 ├── README.md                # Este archivo
 ├── manual_xoni_dip.pdf      # Manual de usuario
@@ -20,78 +20,51 @@ xonidip/
 └── fonts/                   # Fuentes personalizadas
 ```
 
-## 🚀 **NOVEDAD: XONIDIP.PY - LANZADOR AUTOMÁTICO**
+## 🚀 **ASÍ DE FÁCIL: SOLO EJECUTA start.py**
 
-Hemos creado un **lanzador automático** llamado `xonidip.py` que:
+**¡Ya no necesitas hacer nada más!** El archivo `start.py` hace TODO por ti:
 
-✅ **INSTALA** todas las dependencias por ti  
-✅ **VERIFICA** que Python esté instalado  
-✅ **EJECUTA** el servidor automáticamente  
-✅ **ABRE** el navegador en la página correcta  
-✅ **SOLO UN CLIC** y todo funciona  
+✅ Detecta automáticamente tu sistema operativo  
+✅ Verifica qué dependencias faltan  
+✅ Las instala con los comandos correctos  
+✅ Ejecuta el programa principal  
+✅ Abre el navegador automáticamente  
 
-## 🪟 **PARA WINDOWS - ASÍ DE FÁCIL**
-
-### **OPCIÓN 1: LA MÁS FÁCIL (RECOMENDADA)**
+## 🪟 **PARA WINDOWS**
 
 ```bash
-# 1. Abre PowerShell o CMD en la carpeta del proyecto
-# 2. Escribe esto y presiona ENTER:
-
-python xonidip.py
-```
-
-### **OPCIÓN 2: DOBLE CLIC (MÁS FÁCIL AÚN)**
-
-1. Abre la carpeta donde descargaste XONIDIP
-2. Haz **doble clic** en el archivo `xonidip.py`
-3. ¡Listo! Se abrirá automáticamente en tu navegador
-
-### **OPCIÓN 3: INSTALACIÓN MANUAL (SI PREFIERES)**
-
-```bash
-# Paso 1: Instalar dependencias
-pip install -r requisitos.txt
-
-# Paso 2: Ejecutar el servidor
+# Abre CMD o PowerShell y escribe:
 python start.py
-
-# Paso 3: Abrir navegador
-# Ve a: http://localhost:5000
 ```
 
-## 🐧 **PARA LINUX - ASÍ DE FÁCIL**
+## 🐧 **PARA LINUX**
 
 ```bash
-# Paso 1: Entrar a la carpeta
-cd xonidip
-
-# Paso 2: Dar permisos al lanzador (solo primera vez)
-chmod +x xonidip.py
-
-# Paso 3: Ejecutar el lanzador (con --break-system-packages)
-python3 xonidip.py --break-system-packages
-
-# O si prefieres instalar manualmente:
-pip install -r requisitos.txt --break-system-packages
+# Abre terminal y escribe:
 python3 start.py
 ```
 
-## 🍎 **PARA macOS - ASÍ DE FÁCIL**
+## 🍎 **PARA macOS**
 
 ```bash
-# Paso 1: Entrar a la carpeta
-cd xonidip
-
-# Paso 2: Ejecutar el lanzador
-python3 xonidip.py
-
-# O manualmente:
-pip3 install -r requisitos.txt
+# Abre terminal y escribe:
 python3 start.py
 ```
 
-## 📱 **CÓMO USARLO (EN 4 PASOS)**
+## 📦 **¿QUÉ HACE start.py POR DENTRO?**
+
+Cuando ejecutas `start.py`, automáticamente:
+
+1. 🔍 **Detecta** si estás en Windows, Linux o Mac
+2. 📋 **Verifica** qué dependencias de `requisitos.txt` faltan
+3. 📥 **Instala** las que faltan:
+   - En Linux: `pip install --break-system-packages`
+   - En Mac: `pip install --user`
+   - En Windows: `pip install` normal
+4. 🚀 **Ejecuta** `xonidip.py` (el programa principal)
+5. 🌐 **Abre** el navegador en http://localhost:5000
+
+## 📱 **CÓMO USAR XONIDIP (EN 4 PASOS)**
 
 | Paso | Qué hacer | Descripción |
 |------|-----------|-------------|
@@ -101,59 +74,64 @@ python3 start.py
 | 4️⃣ | **Generar** | ¡Crea todos y descarga ZIP! |
 
 ## 📂 **¿DÓNDE ESTÁN MIS DIPLOMAS?**
-Dentro de la carpeta:
+
+Todos los diplomas generados se guardan automáticamente en la carpeta:
 ```
 /diplomas_generados/
 ```
-(Puedes copiarlos, enviarlos por email, imprimirlos...)
 
 ## 🔧 **PROBLEMAS COMUNES (Y SOLUCIONES)**
 
-### ❌ "No module named 'Flask'"
+### ❌ **"Python no está instalado"**
 ```bash
-# SOLUCIÓN: Instala las dependencias
-pip install -r requisitos.txt
-
-# En Linux (si da error):
-pip install -r requisitos.txt --break-system-packages
+# Descarga Python desde:
+https://www.python.org/downloads/
 ```
 
-### ❌ "Error de permisos"
+### ❌ **"No module named 'Flask'"**
 ```bash
-# SOLUCIÓN LINUX:
-pip install -r requisitos.txt --break-system-packages
-
-# SOLUCIÓN MAC:
-pip install --user -r requisitos.txt
+# Solo ejecuta start.py de nuevo:
+python start.py
 ```
 
-### ❌ "Puerto 5000 en uso"
+### ❌ **"Error de permisos en Linux"**
 ```bash
-# SOLUCIÓN: Abre start.py y cambia el puerto (línea final):
+# start.py ya usa --break-system-packages automáticamente
+python3 start.py
+```
+
+### ❌ **"Puerto 5000 en uso"**
+```bash
+# Abre xonidip.py y cambia el puerto (línea final):
 app.run(port=5001)
 
 # Luego ve a: http://localhost:5001
 ```
 
-### ❌ "No se ven las tildes"
-**SOLUCIÓN:** Guarda tu archivo de nombres en UTF-8 (el bloc de notas ya lo hace por defecto)
+## 📞 **¿NECESITAS AYUDA?**
 
-## 📞 ¿NECITAS AYUDA?
-
-- 📸 **Instagram:** @xonidu
+- 📸 **Instagram:** [@xonidu](https://instagram.com/xonidu)
 - 📧 **Email:** xonidu@gmail.com
-- 💻 **GitHub:** XONIDU/xonidip
+- 💻 **GitHub:** [XONIDU/xonidip](https://github.com/XONIDU/xonidip)
 
-## ✅ COSAS QUE PUEDES HACER
+## ✅ **LO QUE PUEDES HACER (Y LO QUE NO)**
 
-| Sí | No |
-|----|----|
-| ✅ Generar diplomas para tu curso | ❌ Crear documentos falsos |
-| ✅ Aprender a automatizar | ❌ Usarlo sin permiso |
-| ✅ Probar con nombres inventados | ❌ Vender los diplomas |
-| ✅ Compartir el código | ❌ Quitar los créditos |
+| ✅ SÍ | ❌ NO |
+|-------|-------|
+| Generar diplomas para tu curso | Crear documentos falsos |
+| Aprender a automatizar | Usarlo sin permiso |
+| Probar con nombres inventados | Vender los diplomas |
+| Compartir el código | Quitar los créditos |
 
-## 🎉 ¡Y LISTO!
+## 📋 **NOTAS IMPORTANTES**
+
+- ✅ Funciona en **Windows, Linux y Mac** con Python 3.8+
+- ✅ Soporta **tildes y caracteres especiales** (á, é, í, ó, ú, ñ)
+- ✅ Puedes usar **Excel, CSV o TXT** para los nombres
+- ✅ Los diplomas se generan en **PNG, PDF o JPG**
+- ✅ Cada archivo incluye el **nombre del participante**
+
+## 🎉 **¡LISTO!**
 
 ```
 ╔════════════════════════════════════╗
@@ -162,5 +140,15 @@ app.run(port=5001)
 ╚════════════════════════════════════╝
 ```
 
----
+**XONIDU** - Enseñando automatización, construyendo conocimiento
+```
+
+## ✅ **VERSIÓN FINAL - CARACTERÍSTICAS:**
+
+1. **Solo menciona `start.py`** como el archivo a ejecutar
+2. **Sin referencias a .bat, .sh o .command**
+3. **Instrucciones idénticas para todos los sistemas** (solo cambia python/python3)
+4. **Explicación clara** de lo que hace start.py automáticamente
+5. **Problemas comunes** con soluciones simples
+6. **Diseño limpio** y fácil de leer
 
