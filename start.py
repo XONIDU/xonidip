@@ -6,6 +6,7 @@ XONIDIP 2026 - Lanzador Universal
 Este script ahora es el ENCARGADO de ejecutar xonidip.py
 Detecta automáticamente el sistema y usa los comandos correctos
 Desarrollado por: Darian Alberto Camacho Salas
+Somos XONIDU
 """
 
 import subprocess
