@@ -9,7 +9,7 @@ Este código tiene **únicamente fines educativos**. No debe utilizarse para cre
 
 ```
 xonidip/
-├── start.py                 # 🟢 LANZADOR UNIVERSAL (¡SOLO EJECUTA ESTE!)
+├── start.py                 # 🟢 LANZADOR UNIVERSAL (¡EJECUTA ESTE!)
 ├── xonidip.py               # 🔵 PROGRAMA PRINCIPAL (servidor Flask)
 ├── requisitos.txt           # Dependencias del proyecto
 ├── README.md                # Este archivo
@@ -37,6 +37,10 @@ xonidip/
 python start.py
 ```
 
+Si tienes problemas de permisos, el script crea automáticamente:
+- `XONIDIP.bat` - Ejecución normal
+- `XONIDIP_ADMIN.bat` - Ejecución como administrador
+
 ## 🐧 **PARA LINUX**
 
 ```bash
@@ -60,9 +64,9 @@ Cuando ejecutas `start.py`, automáticamente:
 3. 📥 **Instala** las que faltan:
    - En Linux: `pip install --break-system-packages`
    - En Mac: `pip install --user`
-   - En Windows: `pip install` normal
+   - En Windows: `pip install` normal (con verificación de pip)
 4. 🚀 **Ejecuta** `xonidip.py` (el programa principal)
-5. 🌐 **Abre** el navegador en http://localhost:5000
+5. 🌐 **Abre** el navegador automáticamente en http://localhost:5000
 
 ## 📱 **CÓMO USAR XONIDIP (EN 4 PASOS)**
 
@@ -80,17 +84,21 @@ Todos los diplomas generados se guardan automáticamente en la carpeta:
 /diplomas_generados/
 ```
 
+También puedes descargarlos como ZIP desde la interfaz web.
+
 ## 🔧 **PROBLEMAS COMUNES (Y SOLUCIONES)**
 
 ### ❌ **"Python no está instalado"**
 ```bash
 # Descarga Python desde:
 https://www.python.org/downloads/
+
+# IMPORTANTE: En Windows, marca "Add Python to PATH" durante la instalación
 ```
 
 ### ❌ **"No module named 'Flask'"**
 ```bash
-# Solo ejecuta start.py de nuevo:
+# Solo ejecuta start.py de nuevo (instala lo que falta):
 python start.py
 ```
 
@@ -100,6 +108,12 @@ python start.py
 python3 start.py
 ```
 
+### ❌ **"Error de permisos en Windows"**
+```bash
+# Usa el archivo creado automáticamente:
+XONIDIP_ADMIN.bat   # Ejecutar como administrador
+```
+
 ### ❌ **"Puerto 5000 en uso"**
 ```bash
 # Abre xonidip.py y cambia el puerto (línea final):
@@ -107,6 +121,9 @@ app.run(port=5001)
 
 # Luego ve a: http://localhost:5001
 ```
+
+### ❌ **"No se ven las tildes"**
+**SOLUCIÓN:** Guarda tu archivo de nombres en UTF-8 (el bloc de notas ya lo hace por defecto)
 
 ## 📞 **¿NECESITAS AYUDA?**
 
@@ -122,13 +139,17 @@ app.run(port=5001)
 | Aprender a automatizar | Usarlo sin permiso |
 | Probar con nombres inventados | Vender los diplomas |
 | Compartir el código | Quitar los créditos |
+| Modificar para prácticas educativas | Usar para documentos oficiales |
 
 ## 📋 **NOTAS IMPORTANTES**
 
 - ✅ Funciona en **Windows, Linux y Mac** con Python 3.8+
 - ✅ Soporta **tildes y caracteres especiales** (á, é, í, ó, ú, ñ)
+- ✅ Puedes usar **Excel, CSV o TXT** para los nombres
 - ✅ Los diplomas se generan en **PNG, PDF o JPG**
 - ✅ Cada archivo incluye el **nombre del participante**
+- ✅ El navegador se **abre automáticamente** al iniciar
+- ✅ En Windows, se crean archivos `.bat` para fácil ejecución
 
 ## 🎉 **¡LISTO!**
 
@@ -139,15 +160,12 @@ app.run(port=5001)
 ╚════════════════════════════════════╝
 ```
 
+---
+
+⭐ **¿Te sirvió?** Dale estrella en GitHub  
+🐛 **¿Encontraste un error?** Abre un "Issue"  
+📢 **¿Sugerencias?** Escríbeme por Instagram
+
+---
+
 **XONIDU** - Enseñando automatización, construyendo conocimiento
-```
-
-## ✅ **VERSIÓN FINAL - CARACTERÍSTICAS:**
-
-1. **Solo menciona `start.py`** como el archivo a ejecutar
-2. **Sin referencias a .bat, .sh o .command**
-3. **Instrucciones idénticas para todos los sistemas** (solo cambia python/python3)
-4. **Explicación clara** de lo que hace start.py automáticamente
-5. **Problemas comunes** con soluciones simples
-6. **Diseño limpio** y fácil de leer
-
