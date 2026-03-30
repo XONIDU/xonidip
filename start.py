@@ -1,9 +1,11 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 """
 XONIDIP 2026 - Lanzador Universal
-Este script ahora es el ENCARGADO de ejecutar xonidip.py
-Detecta automáticamente el sistema y usa los comandos correctos
+Este script detecta el sistema, instala dependencias y ejecuta xonidip.py
+Genera un archivo .bat en Windows para ejecutar con permisos de administrador
 Desarrollado por: Darian Alberto Camacho Salas
-Somos XONIDU
 """
 
 import subprocess
@@ -13,6 +15,7 @@ import webbrowser
 import time
 import platform
 import threading
+import ctypes
 
 # Colores para terminal
 class Colors:
@@ -51,6 +54,15 @@ REQUISITOS = [
     'openpyxl==3.1.2'
 ]
 
+def is_admin():
+    """Verifica si el script se ejecuta como administrador en Windows"""
+    if platform.system() == 'Windows':
+        try:
+            return ctypes.windll.shell32.IsUserAnAdmin()
+        except:
+            return False
+    return True
+
 def get_system():
     """Detecta el sistema operativo"""
     return platform.system().lower()
@@ -61,7 +73,6 @@ def get_linux_distro():
         return None
     
     try:
-        # Intentar leer /etc/os-release
         if os.path.exists('/etc/os-release'):
             with open('/etc/os-release', 'r') as f:
                 content = f.read().lower()
@@ -82,7 +93,6 @@ def get_linux_distro():
                 elif 'opensuse' in content:
                     return 'opensuse'
         
-        # Intentar con lsb_release
         try:
             result = subprocess.run(['lsb_release', '-i'], capture_output=True, text=True)
             if 'Ubuntu' in result.stdout:
@@ -105,7 +115,6 @@ def get_python_command():
     if get_system() == 'windows':
         return ['python']
     else:
-        # En Linux/Mac, probar python3 primero
         try:
             subprocess.run(['python3', '--version'], capture_output=True, check=True)
             return ['python3']
@@ -114,28 +123,23 @@ def get_python_command():
 
 def get_pip_command():
     """Obtiene el comando pip correcto según el sistema"""
-    return [sys.executable, '-m', 'pip']
+    if get_system() == 'windows':
+        return [sys.executable, '-m', 'pip']
+    else:
+        return [sys.executable, '-m', 'pip']
 
 def get_install_flags():
-    """Obtiene los flags de instalación según el sistema y distro"""
+    """Obtiene los flags de instalación según el sistema"""
     flags = []
     sistema = get_system()
     distro = get_linux_distro()
     
     if sistema == 'linux':
-        # Diferentes flags según la distro
-        if distro in ['ubuntu', 'debian', 'mint']:
+        if distro in ['ubuntu', 'debian', 'mint', 'arch', 'manjaro']:
             flags.append('--break-system-packages')
-        elif distro in ['fedora', 'centos', 'rhel']:
-            flags.append('--user')
-        elif distro in ['arch', 'manjaro']:
-            flags.append('--break-system-packages')
-        elif distro == 'opensuse':
-            flags.append('--user')
         else:
-            flags.append('--break-system-packages')
-    
-    elif sistema == 'darwin':  # Mac
+            flags.append('--user')
+    elif sistema == 'darwin':
         flags.append('--user')
     
     return flags
@@ -171,6 +175,37 @@ def check_python():
         subprocess.run(cmd, capture_output=True, check=True)
         return True
     except:
+        return False
+
+def check_pip():
+    """Verifica que pip está instalado y funciona"""
+    try:
+        cmd = get_pip_command() + ['--version']
+        subprocess.run(cmd, capture_output=True, check=True)
+        return True
+    except:
+        return False
+
+def install_pip_windows():
+    """Instala pip en Windows si no está disponible"""
+    print(f"{Colors.YELLOW}Pip no encontrado. Instalando pip...{Colors.END}")
+    try:
+        # Descargar get-pip.py
+        import urllib.request
+        print("  Descargando get-pip.py...")
+        urllib.request.urlretrieve('https://bootstrap.pypa.io/get-pip.py', 'get-pip.py')
+        
+        # Ejecutar get-pip.py
+        print("  Instalando pip...")
+        subprocess.run([sys.executable, 'get-pip.py'], check=True)
+        
+        # Limpiar
+        os.remove('get-pip.py')
+        
+        print(f"{Colors.GREEN}  Pip instalado correctamente{Colors.END}")
+        return True
+    except Exception as e:
+        print(f"{Colors.RED}  Error instalando pip: {e}{Colors.END}")
         return False
 
 def check_dependencies():
@@ -258,6 +293,129 @@ def open_browser():
         print(f"{Colors.YELLOW}No se pudo abrir el navegador automaticamente{Colors.END}")
         print(f"   Abre manualmente: {url}")
 
+def create_windows_bat():
+    """Crea un archivo .bat para ejecutar con permisos de administrador"""
+    sistema = get_system()
+    if sistema != 'windows':
+        return
+    
+    bat_content = '''@echo off
+title XONIDIP 2026 - Generador de Diplomas
+color 1F
+cls
+
+echo ========================================
+echo      XONIDIP 2026 - Generador de Diplomas
+echo      Desarrollado por Darian Alberto
+echo ========================================
+echo.
+
+:: Verificar si se ejecuta como administrador
+net session >nul 2>&1
+if %errorlevel% neq 0 (
+    echo [AVISO] Se requieren permisos de administrador para instalar dependencias
+    echo.
+    echo Solicitando permisos...
+    echo.
+    
+    :: Crear script temporal para ejecutar con admin
+    echo Set UAC = CreateObject^("Shell.Application"^) > "%temp%\\getadmin.vbs"
+    echo UAC.ShellExecute "%~s0", "", "", "runas", 1 >> "%temp%\\getadmin.vbs"
+    "%temp%\\getadmin.vbs"
+    del "%temp%\\getadmin.vbs"
+    exit /B
+)
+
+echo [OK] Permisos de administrador obtenidos
+echo.
+
+:: Verificar Python
+python --version >nul 2>&1
+if errorlevel 1 (
+    echo [ERROR] Python no esta instalado
+    echo.
+    echo Descarga Python desde: https://www.python.org/downloads/
+    echo IMPORTANTE: Marca "Add Python to PATH" durante la instalacion
+    pause
+    start https://www.python.org/downloads/
+    exit
+)
+
+echo [OK] Python instalado
+python --version
+echo.
+
+:: Verificar pip
+python -m pip --version >nul 2>&1
+if errorlevel 1 (
+    echo [AVISO] Pip no encontrado. Instalando pip...
+    python -m ensurepip --upgrade
+)
+
+echo [OK] Pip disponible
+echo.
+
+:: Instalar dependencias
+echo Instalando dependencias necesarias...
+python -m pip install flask==2.3.3
+python -m pip install pillow==10.0.1
+python -m pip install pandas==2.0.3
+python -m pip install qrcode==7.4.2
+python -m pip install openpyxl==3.1.2
+echo.
+echo [OK] Dependencias instaladas
+echo.
+
+:: Iniciar XONIDIP
+echo ========================================
+echo Iniciando XONIDIP...
+echo ========================================
+echo.
+start http://localhost:5000
+python xonidip.py
+
+pause
+'''
+    
+    bat_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'XONIDIP_ADMIN.bat')
+    with open(bat_path, 'w', encoding='utf-8') as f:
+        f.write(bat_content)
+    print(f"{Colors.GREEN}Archivo XONIDIP_ADMIN.bat creado - Ejecuta como administrador si hay problemas{Colors.END}")
+    
+    # También crear un .bat simple sin admin
+    simple_bat = '''@echo off
+title XONIDIP 2026
+color 1F
+python start.py
+pause
+'''
+    simple_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'XONIDIP.bat')
+    with open(simple_path, 'w', encoding='utf-8') as f:
+        f.write(simple_bat)
+    print(f"{Colors.GREEN}Archivo XONIDIP.bat creado - Doble clic para ejecutar{Colors.END}")
+
+def mostrar_instrucciones_python():
+    """Muestra instrucciones para instalar Python según el sistema"""
+    sistema = get_system()
+    distro = get_linux_distro()
+    
+    if sistema == 'windows':
+        print(f"   Descarga Python desde: https://www.python.org/downloads/")
+        print(f"   IMPORTANTE: Al instalar, marca 'Add Python to PATH'")
+        print(f"   Luego cierra y vuelve a abrir la terminal")
+    elif sistema == 'linux':
+        if distro in ['ubuntu', 'debian', 'mint']:
+            print(f"   Instala con: sudo apt update && sudo apt install python3 python3-pip")
+        elif distro in ['fedora', 'centos']:
+            print(f"   Instala con: sudo dnf install python3 python3-pip")
+        elif distro in ['arch', 'manjaro']:
+            print(f"   Instala con: sudo pacman -S python python-pip")
+        else:
+            print(f"   Instala Python 3 desde: https://www.python.org/downloads/")
+    elif sistema == 'darwin':
+        print(f"   Instala con: brew install python3")
+        print(f"   O descarga desde: https://www.python.org/downloads/")
+
 def main():
     """Función principal - Ejecuta xonidip.py"""
     # Limpiar pantalla según sistema
@@ -278,6 +436,11 @@ def main():
     print(f"{Colors.BOLD}Python:{Colors.END} {sys.version.split()[0]}")
     print(f"{Colors.BOLD}Ruta:{Colors.END} {os.path.dirname(os.path.abspath(__file__))}")
     
+    # Crear archivos .bat para Windows (siempre)
+    if sistema == 'windows':
+        create_windows_bat()
+        print()
+    
     # Verificar que Python está instalado
     if not check_python():
         print(f"\n{Colors.RED}Error: Python no esta instalado o no esta en el PATH{Colors.END}")
@@ -285,20 +448,39 @@ def main():
         input(f"\n{Colors.YELLOW}Presiona Enter para salir...{Colors.END}")
         return
     
+    # Verificar pip en Windows e instalarlo si es necesario
+    if sistema == 'windows' and not check_pip():
+        print(f"\n{Colors.YELLOW}Pip no encontrado. Intentando instalar...{Colors.END}")
+        if not install_pip_windows():
+            print(f"\n{Colors.RED}No se pudo instalar pip automaticamente{Colors.END}")
+            print(f"   Ejecuta XONIDIP_ADMIN.bat como administrador")
+            input(f"\n{Colors.YELLOW}Presiona Enter para salir...{Colors.END}")
+            return
+    
     # Verificar dependencias
     missing = check_dependencies()
     
     # Instalar dependencias si faltan
     if missing:
         print(f"\n{Colors.YELLOW}Faltan {len(missing)} dependencias{Colors.END}")
-        respuesta = input(f"Instalar ahora? (s/n): ")
+        
+        # En Windows, sugerir usar el .bat con admin
+        if sistema == 'windows':
+            print(f"\n{Colors.YELLOW}Se recomienda ejecutar XONIDIP_ADMIN.bat como administrador{Colors.END}")
+            print(f"   para instalar las dependencias automaticamente")
+            respuesta = input(f"Intentar instalar ahora? (s/n): ")
+        else:
+            respuesta = input(f"Instalar ahora? (s/n): ")
+        
         if respuesta.lower() == 's':
             if not install_dependencies(missing):
                 print(f"\n{Colors.YELLOW}Continuando a pesar de errores...{Colors.END}")
         else:
             print(f"\n{Colors.YELLOW}No se instalaran dependencias. Puede haber errores.{Colors.END}")
+            if sistema == 'windows':
+                print(f"   Ejecuta XONIDIP_ADMIN.bat como administrador para instalarlas")
     
-    # Verificar que existe xonidip.py (el programa principal)
+    # Verificar que existe xonidip.py
     if not os.path.exists('xonidip.py'):
         print(f"\n{Colors.RED}Error: No se encuentra xonidip.py{Colors.END}")
         print(f"   Asegurate de que xonidip.py esta en la misma carpeta")
@@ -313,7 +495,7 @@ def main():
     browser_thread.daemon = True
     browser_thread.start()
     
-    # Ejecutar xonidip.py (el programa principal de diplomas)
+    # Ejecutar xonidip.py
     try:
         python_cmd = get_python_command()
         print(f"{Colors.BOLD}Ejecutando:{Colors.END} {' '.join(python_cmd + ['xonidip.py'])}")
@@ -335,86 +517,8 @@ def main():
     if sistema != 'windows':
         input(f"\n{Colors.YELLOW}Presiona Enter para salir...{Colors.END}")
 
-def mostrar_instrucciones_python():
-    """Muestra instrucciones para instalar Python según el sistema"""
-    sistema = get_system()
-    distro = get_linux_distro()
-    
-    if sistema == 'windows':
-        print(f"   Descarga Python desde: https://www.python.org/downloads/")
-        print(f"   IMPORTANTE: Al instalar, marca 'Add Python to PATH'")
-    elif sistema == 'linux':
-        if distro in ['ubuntu', 'debian', 'mint']:
-            print(f"   Instala con: sudo apt update")
-            print(f"   sudo apt install python3 python3-pip python3-venv")
-        elif distro in ['fedora', 'centos']:
-            print(f"   Instala con: sudo dnf install python3 python3-pip")
-        elif distro in ['arch', 'manjaro']:
-            print(f"   Instala con: sudo pacman -S python python-pip")
-        elif distro == 'opensuse':
-            print(f"   Instala con: sudo zypper install python3 python3-pip")
-        else:
-            print(f"   Instala Python 3 desde: https://www.python.org/downloads/")
-    elif sistema == 'darwin':
-        print(f"   Instala con: brew install python3")
-        print(f"   O descarga desde: https://www.python.org/downloads/")
-
-def crear_accesos_directos():
-    """Crea accesos directos según el sistema"""
-    sistema = get_system()
-    
-    if sistema == 'windows':
-        # Crear .bat para Windows
-        with open('INICIAR_XONIDIP.bat', 'w') as f:
-            f.write("""@echo off
-title XONIDIP 2026
-color 1F
-echo ========================================
-echo      XONIDIP 2026 - Generador de Diplomas
-echo      Desarrollado por Darian Alberto
-echo ========================================
-echo.
-python start.py
-pause
-""")
-        print(f"{Colors.GREEN}Creado INICIAR_XONIDIP.bat - Haz doble clic para ejecutar{Colors.END}")
-    
-    elif sistema == 'linux':
-        # Crear .sh para Linux
-        with open('INICIAR_XONIDIP.sh', 'w') as f:
-            f.write("""#!/bin/bash
-echo "========================================"
-echo "      XONIDIP 2026 - Generador de Diplomas"
-echo "      Desarrollado por Darian Alberto"
-echo "========================================"
-echo ""
-python3 start.py
-read -p "Presiona Enter para salir"
-""")
-        os.chmod('INICIAR_XONIDIP.sh', 0o755)
-        print(f"{Colors.GREEN}Creado INICIAR_XONIDIP.sh - Ejecuta con: ./INICIAR_XONIDIP.sh{Colors.END}")
-    
-    elif sistema == 'darwin':
-        # Crear .command para Mac
-        with open('INICIAR_XONIDIP.command', 'w') as f:
-            f.write("""#!/bin/bash
-cd "$(dirname "$0")"
-echo "========================================"
-echo "      XONIDIP 2026 - Generador de Diplomas"
-echo "      Desarrollado por Darian Alberto"
-echo "========================================"
-echo ""
-python3 start.py
-""")
-        os.chmod('INICIAR_XONIDIP.command', 0o755)
-        print(f"{Colors.GREEN}Creado INICIAR_XONIDIP.command - Haz doble clic para ejecutar{Colors.END}")
-
 if __name__ == '__main__':
     try:
-        # Crear accesos directos
-        crear_accesos_directos()
-        
-        # Ejecutar programa principal
         main()
     except KeyboardInterrupt:
         print(f"\n{Colors.YELLOW}Saliendo...{Colors.END}")
