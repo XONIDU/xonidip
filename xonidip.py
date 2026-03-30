@@ -2,6 +2,8 @@ import os
 import io
 import zipfile
 import socket
+import webbrowser
+import threading
 from flask import Flask, render_template, request, send_file, jsonify, send_from_directory, url_for
 from PIL import Image, ImageDraw, ImageFont
 import pandas as pd
@@ -32,6 +34,9 @@ for folder in [app.config['UPLOAD_FOLDER'], app.config['OUTPUT_FOLDER'], app.con
     if not os.path.exists(folder):
         os.makedirs(folder)
 
+# Variable para controlar si ya se abrió el navegador
+browser_opened = False
+
 # ===== FUNCIÓN PARA OBTENER IP =====
 def get_server_url():
     """Obtiene la URL del servidor con IP y puerto"""
@@ -41,6 +46,21 @@ def get_server_url():
         return f"http://{local_ip}:5000"
     except:
         return "http://localhost:5000"
+
+# ===== FUNCIÓN PARA ABRIR NAVEGADOR AUTOMÁTICAMENTE =====
+def open_browser_after_delay():
+    """Abre el navegador después de que el servidor esté listo"""
+    global browser_opened
+    time.sleep(2)  # Esperar 2 segundos a que el servidor inicie
+    if not browser_opened:
+        browser_opened = True
+        url = get_server_url()
+        try:
+            webbrowser.open(url)
+            print(f"\n🌐 Navegador abierto automáticamente en: {url}")
+        except:
+            print(f"\n⚠️ No se pudo abrir el navegador automáticamente")
+            print(f"   Abre manualmente: {url}")
 
 # ===== FUNCIÓN PARA GENERAR QR =====
 def generate_qr_base64(url):
@@ -660,28 +680,34 @@ if __name__ == '__main__':
     server_url = get_server_url()
     
     print("=" * 70)
-    print("XONIDIP - GENERADOR MASIVO DE DIPLOMAS (MEJORADO) 🎓")
+    print("XONIDIP - GENERADOR MASIVO DE DIPLOMAS")
     print("=" * 70)
-    print("\n✅ NUEVAS CARACTERÍSTICAS:")
+    print("\n✅ CARACTERÍSTICAS:")
     print("   • Formatos de salida: PNG, PDF, JPG")
     print("   • Nombres de archivo personalizados: diploma_Nombre_Apellido.pdf")
     print("   • Soporte mejorado para tildes y caracteres especiales")
+    print("   • Apertura automática del navegador")
     
     fonts_folder = app.config['FONTS_FOLDER']
     if not os.path.exists(fonts_folder):
         os.makedirs(fonts_folder)
-        print(f"\nCarpeta 'fonts' creada en: {os.path.abspath(fonts_folder)}")
-        print("Copia archivos .ttf a esta carpeta para más opciones de fuentes")
+        print(f"\n📁 Carpeta 'fonts' creada en: {os.path.abspath(fonts_folder)}")
+        print("💡 Copia archivos .ttf a esta carpeta para más opciones de fuentes")
     
-    print("\n Verificando fuentes disponibles...")
+    print("\n🔍 Verificando fuentes disponibles...")
     
-    print(f"\nACCESO DESDE CUALQUIER DISPOSITIVO:")
+    print(f"\n🌐 ACCESO DESDE CUALQUIER DISPOSITIVO:")
     print(f"   • {server_url}")
+    
+    # Iniciar hilo para abrir el navegador automáticamente
+    browser_thread = threading.Thread(target=open_browser_after_delay)
+    browser_thread.daemon = True
+    browser_thread.start()
     
     try:
         qr_ascii = qrcode.QRCode()
         qr_ascii.add_data(server_url)
-        print("\nEscanea este código QR desde tu teléfono:")
+        print("\n📱 Escanea este código QR desde tu teléfono:")
         print("-" * 50)
         qr_ascii.print_ascii()
         print("-" * 50)
@@ -691,6 +717,7 @@ if __name__ == '__main__':
     print("\n" + "=" * 70)
     print("XONIDU - Darian Alberto Camacho Salas")
     print("Servidor iniciado correctamente")
+    print("El navegador se abrirá automáticamente en unos segundos...")
     print("=" * 70)
     
     app.run(
