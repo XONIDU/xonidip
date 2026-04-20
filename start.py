@@ -2,34 +2,37 @@
 # -*- coding: utf-8 -*-
 
 """
-XONIDIP 2026 - Lanzador Universal
-Este script detecta el sistema, instala dependencias y ejecuta xonidip.py
-Genera un archivo .bat en Windows para ejecutar con permisos de administrador
+XONIDIP 2026 - Lanzador Universal (Mejorado + .bat para admin en Windows)
+Detecta el sistema, instala dependencias, genera .bat y ejecuta xonidip.py
+
 Desarrollado por: Darian Alberto Camacho Salas
+Organización: XONIDU
 """
 
 import subprocess
 import sys
 import os
-import webbrowser
 import time
 import platform
+import shutil
+import webbrowser
 import threading
-import ctypes
 
+# ============================================================================
 # Colores para terminal
+# ============================================================================
 class Colors:
-    HEADER = '\033[95m'
-    BLUE = '\033[94m'
     GREEN = '\033[92m'
     YELLOW = '\033[93m'
     RED = '\033[91m'
+    PURPLE = '\033[95m'
+    CYAN = '\033[96m'
+    BLUE = '\033[94m'
     END = '\033[0m'
     BOLD = '\033[1m'
     
     @staticmethod
     def supports_color():
-        """Verifica si la terminal soporta colores"""
         if platform.system() == 'Windows':
             try:
                 import ctypes
@@ -39,79 +42,50 @@ class Colors:
                 return False
         return True
 
-# Desactivar colores si no hay soporte
 if not Colors.supports_color():
     for attr in dir(Colors):
         if not attr.startswith('_') and attr != 'supports_color':
             setattr(Colors, attr, '')
 
-# Dependencias necesarias para xonidip.py
-REQUISITOS = [
-    'flask==2.3.3',
-    'pillow==10.0.1',
-    'pandas==2.0.3',
-    'qrcode==7.4.2',
-    'openpyxl==3.1.2'
-]
-
-def is_admin():
-    """Verifica si el script se ejecuta como administrador en Windows"""
-    if platform.system() == 'Windows':
-        try:
-            return ctypes.windll.shell32.IsUserAnAdmin()
-        except:
-            return False
-    return True
-
+# ============================================================================
+# Detección del sistema
+# ============================================================================
 def get_system():
-    """Detecta el sistema operativo"""
     return platform.system().lower()
 
 def get_linux_distro():
-    """Detecta la distribución de Linux específica"""
+    """Detecta el tipo de distribución Linux"""
     if get_system() != 'linux':
         return None
-    
     try:
         if os.path.exists('/etc/os-release'):
             with open('/etc/os-release', 'r') as f:
                 content = f.read().lower()
-                if 'ubuntu' in content:
-                    return 'ubuntu'
-                elif 'debian' in content:
-                    return 'debian'
+                if any(x in content for x in ['ubuntu', 'debian', 'mint', 'antix', 'kali']):
+                    return 'debian-based'
+                elif any(x in content for x in ['arch', 'manjaro']):
+                    return 'arch-based'
                 elif 'fedora' in content:
                     return 'fedora'
-                elif 'centos' in content:
+                elif 'centos' in content or 'rhel' in content:
                     return 'centos'
-                elif 'arch' in content:
-                    return 'arch'
-                elif 'manjaro' in content:
-                    return 'manjaro'
-                elif 'mint' in content:
-                    return 'mint'
                 elif 'opensuse' in content:
                     return 'opensuse'
-        
-        try:
-            result = subprocess.run(['lsb_release', '-i'], capture_output=True, text=True)
-            if 'Ubuntu' in result.stdout:
-                return 'ubuntu'
-            elif 'Debian' in result.stdout:
-                return 'debian'
-            elif 'Fedora' in result.stdout:
-                return 'fedora'
-            elif 'CentOS' in result.stdout:
-                return 'centos'
-        except:
-            pass
-        
+        if shutil.which('apt'):
+            return 'debian-based'
+        elif shutil.which('pacman'):
+            return 'arch-based'
+        elif shutil.which('dnf'):
+            return 'fedora'
+        elif shutil.which('yum'):
+            return 'centos'
+        elif shutil.which('zypper'):
+            return 'opensuse'
         return 'linux-generico'
     except:
         return 'linux-generico'
 
 def get_python_command():
-    """Obtiene el comando Python correcto según el sistema"""
     if get_system() == 'windows':
         return ['python']
     else:
@@ -122,33 +96,24 @@ def get_python_command():
             return ['python']
 
 def get_pip_command():
-    """Obtiene el comando pip correcto según el sistema"""
-    if get_system() == 'windows':
-        return [sys.executable, '-m', 'pip']
-    else:
-        return [sys.executable, '-m', 'pip']
+    return [sys.executable, '-m', 'pip']
 
 def get_install_flags():
-    """Obtiene los flags de instalación según el sistema"""
     flags = []
     sistema = get_system()
     distro = get_linux_distro()
-    
     if sistema == 'linux':
-        if distro in ['ubuntu', 'debian', 'mint', 'arch', 'manjaro']:
+        if distro in ['arch-based', 'fedora']:
             flags.append('--break-system-packages')
         else:
             flags.append('--user')
     elif sistema == 'darwin':
         flags.append('--user')
-    
     return flags
 
 def print_banner():
-    """Muestra el banner de XONIDIP"""
     sistema = get_system()
     distro = get_linux_distro()
-    
     sistema_texto = {
         'windows': 'WINDOWS',
         'linux': f'LINUX ({distro.upper()})' if distro else 'LINUX',
@@ -156,20 +121,23 @@ def print_banner():
     }.get(sistema, 'DESCONOCIDO')
     
     banner = f"""
-{Colors.BLUE}{Colors.BOLD}╔══════════════════════════════════════════════════════════╗
-║                     XONIDIP 2026 v4.2.0                     ║
+{Colors.PURPLE}{Colors.BOLD}╔══════════════════════════════════════════════════════════╗
+║                    XONIDIP 2026 v4.2.0                      ║
 ║              Generador Profesional de Diplomas               ║
 ║                                                            ║
-║               Sistema detectado: {sistema_texto}            ║
+║               Sistema detectado: {sistema_texto:<27} ║
 ║                                                            ║
-║               Desarrollado por: Darian Alberto               ║
-║                      Camacho Salas                           ║
+║               Desarrollado por: Darian Alberto             ║
+║                      Camacho Salas                         ║
+║                      Organización: XONIDU                  ║
 ╚══════════════════════════════════════════════════════════════╝{Colors.END}
     """
     print(banner)
 
+# ============================================================================
+# Verificación e instalación de pip
+# ============================================================================
 def check_python():
-    """Verifica que Python está instalado"""
     try:
         cmd = get_python_command() + ['--version']
         subprocess.run(cmd, capture_output=True, check=True)
@@ -178,7 +146,6 @@ def check_python():
         return False
 
 def check_pip():
-    """Verifica que pip está instalado y funciona"""
     try:
         cmd = get_pip_command() + ['--version']
         subprocess.run(cmd, capture_output=True, check=True)
@@ -186,139 +153,166 @@ def check_pip():
     except:
         return False
 
+def install_pip_linux():
+    distro = get_linux_distro()
+    print(f"{Colors.YELLOW}Instalando pip en Linux ({distro})...{Colors.END}")
+    if distro == 'debian-based':
+        try:
+            subprocess.run(['sudo', 'apt', 'update'], check=False)
+            subprocess.run(['sudo', 'apt', 'install', '-y', 'python3-pip'], check=True)
+            return True
+        except:
+            return False
+    elif distro == 'arch-based':
+        try:
+            subprocess.run(['sudo', 'pacman', '-S', '--noconfirm', 'python-pip'], check=True)
+            return True
+        except:
+            return False
+    elif distro == 'fedora':
+        try:
+            subprocess.run(['sudo', 'dnf', 'install', '-y', 'python3-pip'], check=True)
+            return True
+        except:
+            return False
+    elif distro == 'centos':
+        try:
+            subprocess.run(['sudo', 'yum', 'install', '-y', 'python3-pip'], check=True)
+            return True
+        except:
+            return False
+    elif distro == 'opensuse':
+        try:
+            subprocess.run(['sudo', 'zypper', 'install', '-y', 'python3-pip'], check=True)
+            return True
+        except:
+            return False
+    return False
+
 def install_pip_windows():
-    """Instala pip en Windows si no está disponible"""
-    print(f"{Colors.YELLOW}Pip no encontrado. Instalando pip...{Colors.END}")
+    print(f"{Colors.YELLOW}Instalando pip en Windows...{Colors.END}")
     try:
-        # Descargar get-pip.py
-        import urllib.request
-        print("  Descargando get-pip.py...")
-        urllib.request.urlretrieve('https://bootstrap.pypa.io/get-pip.py', 'get-pip.py')
-        
-        # Ejecutar get-pip.py
-        print("  Instalando pip...")
-        subprocess.run([sys.executable, 'get-pip.py'], check=True)
-        
-        # Limpiar
-        os.remove('get-pip.py')
-        
-        print(f"{Colors.GREEN}  Pip instalado correctamente{Colors.END}")
+        subprocess.run([sys.executable, '-m', 'ensurepip', '--upgrade'], check=True)
         return True
-    except Exception as e:
-        print(f"{Colors.RED}  Error instalando pip: {e}{Colors.END}")
-        return False
+    except:
+        try:
+            import urllib.request
+            urllib.request.urlretrieve('https://bootstrap.pypa.io/get-pip.py', 'get-pip.py')
+            subprocess.run([sys.executable, 'get-pip.py'], check=True)
+            os.remove('get-pip.py')
+            return True
+        except:
+            return False
+
+# ============================================================================
+# Dependencias desde requisitos.txt o lista por defecto
+# ============================================================================
+def get_requirements():
+    if os.path.exists('requisitos.txt'):
+        with open('requisitos.txt', 'r') as f:
+            return [line.strip() for line in f if line.strip() and not line.startswith('#')]
+    return [
+        'flask==2.3.3',
+        'pillow==10.0.1',
+        'pandas==2.0.3',
+        'qrcode==7.4.2',
+        'openpyxl==3.1.2'
+    ]
 
 def check_dependencies():
-    """Verifica qué dependencias necesita xonidip.py"""
-    print(f"\n{Colors.BOLD}Verificando dependencias para XONIDIP...{Colors.END}")
-    
+    print(f"\n{Colors.BOLD}Verificando dependencias...{Colors.END}")
+    reqs = get_requirements()
     missing = []
-    for req in REQUISITOS:
-        package = req.split('==')[0]
+    for req in reqs:
+        pkg = req.split('[')[0].split('==')[0].split('>=')[0].strip()
         try:
-            __import__(package.replace('-', '_'))
-            print(f"{Colors.GREEN}  - {package} OK{Colors.END}")
+            __import__(pkg.replace('-', '_'))
+            print(f"{Colors.GREEN}  - {pkg} OK{Colors.END}")
         except ImportError:
-            print(f"{Colors.YELLOW}  - {package} (faltante){Colors.END}")
+            print(f"{Colors.YELLOW}  - {pkg} (faltante){Colors.END}")
             missing.append(req)
-    
     return missing
 
 def install_dependencies(missing):
-    """Instala las dependencias faltantes según el sistema"""
     if not missing:
-        print(f"\n{Colors.GREEN}Todas las dependencias estan instaladas{Colors.END}")
         return True
-    
     print(f"\n{Colors.BOLD}Instalando dependencias faltantes...{Colors.END}")
-    
     pip_cmd = get_pip_command()
     flags = get_install_flags()
-    
-    sistema = get_system()
-    distro = get_linux_distro()
-    
-    print(f"{Colors.YELLOW}Sistema: {sistema}{Colors.END}")
-    if distro:
-        print(f"{Colors.YELLOW}Distribucion: {distro}{Colors.END}")
-    if flags:
-        print(f"{Colors.YELLOW}Flags: {' '.join(flags)}{Colors.END}")
-    
     success = True
     for req in missing:
-        print(f"  Instalando {req}...")
         try:
             cmd = pip_cmd + ['install', req] + flags
-            subprocess.run(cmd, check=True)
-            print(f"{Colors.GREEN}  - {req} instalado{Colors.END}")
-        except subprocess.CalledProcessError as e:
-            print(f"{Colors.RED}  Error instalando {req}{Colors.END}")
-            print(f"     {e}")
-            success = False
-    
-    if success:
-        print(f"\n{Colors.GREEN}Todas las dependencias instaladas correctamente{Colors.END}")
-    else:
-        print(f"\n{Colors.YELLOW}Algunas dependencias no se instalaron{Colors.END}")
-        print(f"   Puedes instalarlas manualmente con:")
-        print(f"   {get_install_command()}")
-    
+            subprocess.run(cmd, check=True, capture_output=True)
+            print(f"{Colors.GREEN}    - {req} instalado{Colors.END}")
+        except:
+            try:
+                cmd2 = pip_cmd + ['install', req]
+                subprocess.run(cmd2, check=True)
+                print(f"{Colors.GREEN}    - {req} instalado (sin flags){Colors.END}")
+            except Exception as e:
+                print(f"{Colors.RED}    - Error instalando {req}: {e}{Colors.END}")
+                success = False
     return success
 
-def get_install_command():
-    """Obtiene el comando de instalación según el sistema"""
-    sistema = get_system()
-    distro = get_linux_distro()
-    
-    if sistema == 'windows':
-        return "pip install -r requisitos.txt"
-    elif sistema == 'linux':
-        if distro in ['ubuntu', 'debian', 'mint', 'arch', 'manjaro']:
-            return "pip install -r requisitos.txt --break-system-packages"
-        else:
-            return "pip install --user -r requisitos.txt"
-    elif sistema == 'darwin':
-        return "pip3 install -r requisitos.txt --user"
-    else:
-        return "pip install -r requisitos.txt"
+# ============================================================================
+# Verificar archivos necesarios
+# ============================================================================
+def check_files():
+    if not os.path.exists('xonidip.py'):
+        print(f"\n{Colors.RED}Error: No se encuentra xonidip.py{Colors.END}")
+        return False
+    for folder in ['templates', 'uploads', 'diplomas_generados', 'fonts']:
+        if not os.path.exists(folder):
+            try:
+                os.makedirs(folder)
+                print(f"{Colors.GREEN}Carpeta {folder} creada{Colors.END}")
+            except:
+                print(f"{Colors.YELLOW}No se pudo crear {folder}/{Colors.END}")
+    return True
 
-def open_browser():
-    """Abre el navegador después de unos segundos"""
-    time.sleep(3)
-    url = 'http://localhost:5000'
-    try:
-        webbrowser.open(url)
-        print(f"{Colors.GREEN}Navegador abierto en {url}{Colors.END}")
-    except:
-        print(f"{Colors.YELLOW}No se pudo abrir el navegador automaticamente{Colors.END}")
-        print(f"   Abre manualmente: {url}")
-
+# ============================================================================
+# Crear archivos .bat para Windows (con y sin admin)
+# ============================================================================
 def create_windows_bat():
-    """Crea un archivo .bat para ejecutar con permisos de administrador"""
-    sistema = get_system()
-    if sistema != 'windows':
+    if get_system() != 'windows':
         return
     
-    bat_content = '''@echo off
-title XONIDIP 2026 - Generador de Diplomas
+    # .bat normal (solo ejecuta start.py)
+    simple_bat = '''@echo off
+title XONIDIP 2026
+color 1F
+echo ========================================
+echo      XONIDIP 2026 - Generador de Diplomas
+echo      Desarrollado por Darian Alberto
+echo ========================================
+echo.
+python start.py
+pause
+'''
+    with open('XONIDIP.bat', 'w', encoding='utf-8') as f:
+        f.write(simple_bat)
+    print(f"{Colors.GREEN}Creado XONIDIP.bat (ejecucion normal){Colors.END}")
+    
+    # .bat con administrador (solicita elevacion e instala dependencias)
+    admin_bat = '''@echo off
+title XONIDIP 2026 - Modo Administrador
 color 1F
 cls
 
 echo ========================================
 echo      XONIDIP 2026 - Generador de Diplomas
-echo      Desarrollado por Darian Alberto
+echo      (Modo Administrador)
 echo ========================================
 echo.
 
 :: Verificar si se ejecuta como administrador
 net session >nul 2>&1
 if %errorlevel% neq 0 (
-    echo [AVISO] Se requieren permisos de administrador para instalar dependencias
+    echo [AVISO] Se requieren permisos de administrador.
+    echo Solicitando elevacion...
     echo.
-    echo Solicitando permisos...
-    echo.
-    
-    :: Crear script temporal para ejecutar con admin
+    :: Crear script VBS para solicitar elevacion
     echo Set UAC = CreateObject^("Shell.Application"^) > "%temp%\\getadmin.vbs"
     echo UAC.ShellExecute "%~s0", "", "", "runas", 1 >> "%temp%\\getadmin.vbs"
     "%temp%\\getadmin.vbs"
@@ -333,8 +327,7 @@ echo.
 python --version >nul 2>&1
 if errorlevel 1 (
     echo [ERROR] Python no esta instalado
-    echo.
-    echo Descarga Python desde: https://www.python.org/downloads/
+    echo Descarga desde: https://www.python.org/downloads/
     echo IMPORTANTE: Marca "Add Python to PATH" durante la instalacion
     pause
     start https://www.python.org/downloads/
@@ -345,18 +338,8 @@ echo [OK] Python instalado
 python --version
 echo.
 
-:: Verificar pip
-python -m pip --version >nul 2>&1
-if errorlevel 1 (
-    echo [AVISO] Pip no encontrado. Instalando pip...
-    python -m ensurepip --upgrade
-)
-
-echo [OK] Pip disponible
-echo.
-
-:: Instalar dependencias
-echo Instalando dependencias necesarias...
+:: Instalar dependencias (con permisos de admin)
+echo Instalando dependencias...
 python -m pip install flask==2.3.3
 python -m pip install pillow==10.0.1
 python -m pip install pandas==2.0.3
@@ -376,152 +359,114 @@ python xonidip.py
 
 pause
 '''
-    
-    bat_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'XONIDIP_ADMIN.bat')
-    with open(bat_path, 'w', encoding='utf-8') as f:
-        f.write(bat_content)
-    print(f"{Colors.GREEN}Archivo XONIDIP_ADMIN.bat creado - Ejecuta como administrador si hay problemas{Colors.END}")
-    
-    # También crear un .bat simple sin admin
-    simple_bat = '''@echo off
-title XONIDIP 2026
-color 1F
-python start.py
-pause
-'''
-    simple_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'XONIDIP.bat')
-    with open(simple_path, 'w', encoding='utf-8') as f:
-        f.write(simple_bat)
-    print(f"{Colors.GREEN}Archivo XONIDIP.bat creado - Doble clic para ejecutar{Colors.END}")
+    with open('XONIDIP_ADMIN.bat', 'w', encoding='utf-8') as f:
+        f.write(admin_bat)
+    print(f"{Colors.GREEN}Creado XONIDIP_ADMIN.bat (ejecutar como administrador){Colors.END}")
 
-def mostrar_instrucciones_python():
-    """Muestra instrucciones para instalar Python según el sistema"""
-    sistema = get_system()
-    distro = get_linux_distro()
-    
-    if sistema == 'windows':
-        print(f"   Descarga Python desde: https://www.python.org/downloads/")
-        print(f"   IMPORTANTE: Al instalar, marca 'Add Python to PATH'")
-        print(f"   Luego cierra y vuelve a abrir la terminal")
-    elif sistema == 'linux':
-        if distro in ['ubuntu', 'debian', 'mint']:
-            print(f"   Instala con: sudo apt update && sudo apt install python3 python3-pip")
-        elif distro in ['fedora', 'centos']:
-            print(f"   Instala con: sudo dnf install python3 python3-pip")
-        elif distro in ['arch', 'manjaro']:
-            print(f"   Instala con: sudo pacman -S python python-pip")
-        else:
-            print(f"   Instala Python 3 desde: https://www.python.org/downloads/")
-    elif sistema == 'darwin':
-        print(f"   Instala con: brew install python3")
-        print(f"   O descarga desde: https://www.python.org/downloads/")
+# ============================================================================
+# Abrir navegador automaticamente
+# ============================================================================
+def open_browser_later():
+    time.sleep(2)
+    url = 'http://localhost:5000'
+    try:
+        webbrowser.open(url)
+        print(f"{Colors.GREEN}Navegador abierto en {url}{Colors.END}")
+    except:
+        print(f"{Colors.YELLOW}No se pudo abrir el navegador automaticamente. Abre manualmente: {url}{Colors.END}")
 
+# ============================================================================
+# Ejecutar servidor (xonidip.py)
+# ============================================================================
+def run_server():
+    print(f"\n{Colors.BOLD}Iniciando XONIDIP...{Colors.END}")
+    print(f"{Colors.CYAN}Presiona Ctrl+C para detener el servidor{Colors.END}")
+    print("-" * 60)
+    
+    browser_thread = threading.Thread(target=open_browser_later)
+    browser_thread.daemon = True
+    browser_thread.start()
+    
+    python_cmd = get_python_command()
+    cmd = python_cmd + ['xonidip.py']
+    try:
+        subprocess.run(cmd)
+    except KeyboardInterrupt:
+        print(f"\n{Colors.YELLOW}Servidor detenido por el usuario{Colors.END}")
+        sys.exit(0)
+    except Exception as e:
+        print(f"{Colors.RED}Error ejecutando xonidip.py: {e}{Colors.END}")
+        sys.exit(1)
+
+# ============================================================================
+# Menu principal
+# ============================================================================
 def main():
-    """Función principal - Ejecuta xonidip.py"""
-    # Limpiar pantalla según sistema
-    if get_system() == 'windows':
-        os.system('cls')
-    else:
-        os.system('clear')
-    
-    # Mostrar banner
+    os.system('clear' if get_system() != 'windows' else 'cls')
     print_banner()
     
     sistema = get_system()
     distro = get_linux_distro()
-    
     print(f"{Colors.BOLD}Sistema operativo:{Colors.END} {sistema}")
     if distro:
         print(f"{Colors.BOLD}Distribucion:{Colors.END} {distro}")
     print(f"{Colors.BOLD}Python:{Colors.END} {sys.version.split()[0]}")
-    print(f"{Colors.BOLD}Ruta:{Colors.END} {os.path.dirname(os.path.abspath(__file__))}")
+    print(f"{Colors.BOLD}Directorio:{Colors.END} {os.getcwd()}")
     
-    # Crear archivos .bat para Windows (siempre)
+    # Crear archivos .bat si estamos en Windows
     if sistema == 'windows':
         create_windows_bat()
         print()
     
-    # Verificar que Python está instalado
+    if not check_files():
+        input("\nPresiona Enter para salir...")
+        sys.exit(1)
+    
     if not check_python():
         print(f"\n{Colors.RED}Error: Python no esta instalado o no esta en el PATH{Colors.END}")
-        mostrar_instrucciones_python()
-        input(f"\n{Colors.YELLOW}Presiona Enter para salir...{Colors.END}")
-        return
-    
-    # Verificar pip en Windows e instalarlo si es necesario
-    if sistema == 'windows' and not check_pip():
-        print(f"\n{Colors.YELLOW}Pip no encontrado. Intentando instalar...{Colors.END}")
-        if not install_pip_windows():
-            print(f"\n{Colors.RED}No se pudo instalar pip automaticamente{Colors.END}")
-            print(f"   Ejecuta XONIDIP_ADMIN.bat como administrador")
-            input(f"\n{Colors.YELLOW}Presiona Enter para salir...{Colors.END}")
-            return
-    
-    # Verificar dependencias
-    missing = check_dependencies()
-    
-    # Instalar dependencias si faltan
-    if missing:
-        print(f"\n{Colors.YELLOW}Faltan {len(missing)} dependencias{Colors.END}")
-        
-        # En Windows, sugerir usar el .bat con admin
         if sistema == 'windows':
-            print(f"\n{Colors.YELLOW}Se recomienda ejecutar XONIDIP_ADMIN.bat como administrador{Colors.END}")
-            print(f"   para instalar las dependencias automaticamente")
-            respuesta = input(f"Intentar instalar ahora? (s/n): ")
+            print("   Descarga Python desde: https://www.python.org/downloads/")
+            print("   IMPORTANTE: Marca 'Add Python to PATH' durante la instalacion.")
+        elif sistema == 'linux':
+            print("   Instala Python con el gestor de paquetes de tu distribucion.")
+        elif sistema == 'darwin':
+            print("   Instala Python con: brew install python3")
+        input("\nPresiona Enter para salir...")
+        sys.exit(1)
+    
+    if not check_pip():
+        print(f"\n{Colors.YELLOW}Pip no encontrado. Intentando instalar...{Colors.END}")
+        instalado = False
+        if sistema == 'linux':
+            instalado = install_pip_linux()
+        elif sistema == 'windows':
+            instalado = install_pip_windows()
         else:
-            respuesta = input(f"Instalar ahora? (s/n): ")
+            print(f"{Colors.YELLOW}Instala pip manualmente (python -m ensurepip) y vuelve a ejecutar.{Colors.END}")
         
+        if not instalado:
+            print(f"{Colors.RED}No se pudo instalar pip automaticamente. Instalalo manualmente y vuelve a ejecutar.{Colors.END}")
+            input("\nPresiona Enter para salir...")
+            sys.exit(1)
+        else:
+            print(f"{Colors.GREEN}Pip instalado correctamente{Colors.END}")
+    
+    missing = check_dependencies()
+    if missing:
+        print(f"\n{Colors.YELLOW}Faltan {len(missing)} dependencias.{Colors.END}")
+        respuesta = input("Instalar automaticamente? (s/n): ")
         if respuesta.lower() == 's':
             if not install_dependencies(missing):
-                print(f"\n{Colors.YELLOW}Continuando a pesar de errores...{Colors.END}")
+                print(f"{Colors.RED}Algunas dependencias no se instalaron. El servidor podria fallar.{Colors.END}")
+                time.sleep(2)
         else:
-            print(f"\n{Colors.YELLOW}No se instalaran dependencias. Puede haber errores.{Colors.END}")
-            if sistema == 'windows':
-                print(f"   Ejecuta XONIDIP_ADMIN.bat como administrador para instalarlas")
+            print(f"{Colors.YELLOW}No se instalaran. Continuando de todas formas...{Colors.END}")
     
-    # Verificar que existe xonidip.py
-    if not os.path.exists('xonidip.py'):
-        print(f"\n{Colors.RED}Error: No se encuentra xonidip.py{Colors.END}")
-        print(f"   Asegurate de que xonidip.py esta en la misma carpeta")
-        print(f"   Archivos encontrados: {', '.join(os.listdir('.')[:5])}")
-        input(f"\n{Colors.YELLOW}Presiona Enter para salir...{Colors.END}")
-        return
-    
-    print(f"\n{Colors.BOLD}Iniciando XONIDIP (programa principal)...{Colors.END}")
-    
-    # Hilo para abrir el navegador
-    browser_thread = threading.Thread(target=open_browser)
-    browser_thread.daemon = True
-    browser_thread.start()
-    
-    # Ejecutar xonidip.py
-    try:
-        python_cmd = get_python_command()
-        print(f"{Colors.BOLD}Ejecutando:{Colors.END} {' '.join(python_cmd + ['xonidip.py'])}")
-        print(f"{Colors.BOLD}Servidor:{Colors.END} http://localhost:5000")
-        print(f"{Colors.BOLD}Para detener:{Colors.END} Ctrl+C")
-        print("-" * 60)
-        
-        subprocess.run(python_cmd + ['xonidip.py'])
-        
-    except KeyboardInterrupt:
-        print(f"\n{Colors.YELLOW}Servidor detenido por el usuario{Colors.END}")
-    except FileNotFoundError as e:
-        print(f"\n{Colors.RED}Error: No se encuentra Python o xonidip.py{Colors.END}")
-        print(f"   {e}")
-    except Exception as e:
-        print(f"\n{Colors.RED}Error ejecutando xonidip.py: {e}{Colors.END}")
-    
-    print(f"\n{Colors.BLUE}Gracias por usar XONIDIP 2026{Colors.END}")
-    if sistema != 'windows':
-        input(f"\n{Colors.YELLOW}Presiona Enter para salir...{Colors.END}")
+    run_server()
 
 if __name__ == '__main__':
     try:
         main()
     except KeyboardInterrupt:
         print(f"\n{Colors.YELLOW}Saliendo...{Colors.END}")
-    except Exception as e:
-        print(f"\n{Colors.RED}Error inesperado: {e}{Colors.END}")
-        input(f"\n{Colors.YELLOW}Presiona Enter para salir...{Colors.END}")
+        sys.exit(0)
