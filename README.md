@@ -1,16 +1,17 @@
-# 🎓 XONIDIP 2026 - Generador de Diplomas v4.2.0
+# XONIDIP 2026 - Generador de Diplomas v4.2.0
 
-**Desarrollado por:** Darian Alberto Camacho Salas
+**Desarrollado por:** Darian Alberto Camacho Salas  
+**Organización:** XONIDU
 
-## ⚠️ ADVERTENCIA
+## ADVERTENCIA
 Este código tiene **únicamente fines educativos**. No debe utilizarse para crear documentos oficiales sin autorización.
 
-## 📁 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 xonidip/
-├── start.py                 # 🟢 LANZADOR UNIVERSAL (¡EJECUTA ESTE!)
-├── xonidip.py               # 🔵 PROGRAMA PRINCIPAL (servidor Flask)
+├── start.py                 # LANZADOR UNIVERSAL (ejecuta este)
+├── xonidip.py               # PROGRAMA PRINCIPAL (servidor Flask)
 ├── requisitos.txt           # Dependencias del proyecto
 ├── README.md                # Este archivo
 ├── manual_xoni_dip.pdf      # Manual de usuario
@@ -20,152 +21,163 @@ xonidip/
 └── fonts/                   # Fuentes personalizadas
 ```
 
-## 🚀 **ASÍ DE FÁCIL: SOLO EJECUTA start.py**
+## Asi de facil: solo ejecuta start.py
 
-**¡Ya no necesitas hacer nada más!** El archivo `start.py` hace TODO por ti:
+El archivo `start.py` hace todo por ti:
 
-✅ Detecta automáticamente tu sistema operativo  
-✅ Verifica qué dependencias faltan  
-✅ Las instala con los comandos correctos  
-✅ Ejecuta el programa principal  
-✅ Abre el navegador automáticamente  
+- Detecta automaticamente tu sistema operativo
+- Verifica que dependencias faltan
+- Las instala con los comandos correctos
+- Ejecuta el programa principal
+- Abre el navegador automaticamente
+- (En Windows) crea los archivos .bat para ejecucion normal y como administrador
 
-## 🪟 **PARA WINDOWS**
+## Instrucciones por sistema
+
+### Windows
 
 ```bash
 # Abre CMD o PowerShell y escribe:
 python start.py
 ```
 
-Si tienes problemas de permisos, el script crea automáticamente:
-- `XONIDIP.bat` - Ejecución normal
-- `XONIDIP_ADMIN.bat` - Ejecución como administrador
+Si tienes problemas de permisos, el script crea automaticamente:
 
-## 🐧 **PARA LINUX**
+- `XONIDIP.bat` - Ejecucion normal
+- `XONIDIP_ADMIN.bat` - Ejecucion como administrador
 
-```bash
-# Abre terminal y escribe:
-python3 start.py
-```
-
-## 🍎 **PARA macOS**
+### Linux
 
 ```bash
 # Abre terminal y escribe:
 python3 start.py
 ```
 
-## 📦 **¿QUÉ HACE start.py POR DENTRO?**
+### macOS
 
-Cuando ejecutas `start.py`, automáticamente:
+```bash
+# Abre terminal y escribe:
+python3 start.py
+```
 
-1. 🔍 **Detecta** si estás en Windows, Linux o Mac
-2. 📋 **Verifica** qué dependencias de `requisitos.txt` faltan
-3. 📥 **Instala** las que faltan:
-   - En Linux: `pip install --break-system-packages`
+## Que hace start.py por dentro
+
+Cuando ejecutas `start.py`, automaticamente:
+
+1. Detecta si estas en Windows, Linux o Mac (y la distribucion de Linux)
+2. Verifica que dependencias de `requisitos.txt` faltan
+3. Instala las que faltan:
+   - En Linux: `pip install --break-system-packages` (o `--user` segun la distro)
    - En Mac: `pip install --user`
-   - En Windows: `pip install` normal (con verificación de pip)
-4. 🚀 **Ejecuta** `xonidip.py` (el programa principal)
-5. 🌐 **Abre** el navegador automáticamente en http://localhost:5000
+   - En Windows: `pip install` normal (con verificacion de pip)
+4. Ejecuta `xonidip.py` (el programa principal)
+5. Abre el navegador automaticamente en `http://localhost:5000`
+6. En Windows, ademas genera los archivos `.bat` para futuras ejecuciones
 
-## 📱 **CÓMO USAR XONIDIP (EN 4 PASOS)**
+## Como usar XONIDIP (en 4 pasos)
 
-| Paso | Qué hacer | Descripción |
-|------|-----------|-------------|
-| 1️⃣ | **Subir plantilla** | Elige tu diploma (JPG o PNG) |
-| 2️⃣ | **Ajustar posición** | Pon el texto donde quieras |
-| 3️⃣ | **Ingresar nombres** | Escribe un nombre por línea |
-| 4️⃣ | **Generar** | ¡Crea todos y descarga ZIP! |
+| Paso | Que hacer | Descripcion |
+|------|-----------|--------------|
+| 1 | Subir plantilla | Elige tu diploma (JPG o PNG) |
+| 2 | Ajustar posicion | Pon el texto donde quieras |
+| 3 | Ingresar nombres | Escribe un nombre por linea |
+| 4 | Generar | Crea todos y descarga ZIP |
 
-## 📂 **¿DÓNDE ESTÁN MIS DIPLOMAS?**
+## Donde estan mis diplomas
 
-Todos los diplomas generados se guardan automáticamente en la carpeta:
+Todos los diplomas generados se guardan automaticamente en la carpeta:
+
 ```
 /diplomas_generados/
 ```
 
-También puedes descargarlos como ZIP desde la interfaz web.
+Tambien puedes descargarlos como ZIP desde la interfaz web.
 
-## 🔧 **PROBLEMAS COMUNES (Y SOLUCIONES)**
+## Problemas comunes (y soluciones)
 
-### ❌ **"Python no está instalado"**
+### "Python no esta instalado"
+
 ```bash
 # Descarga Python desde:
 https://www.python.org/downloads/
 
-# IMPORTANTE: En Windows, marca "Add Python to PATH" durante la instalación
+# IMPORTANTE: En Windows, marca "Add Python to PATH" durante la instalacion
 ```
 
-### ❌ **"No module named 'Flask'"**
+### "No module named 'Flask'"
+
 ```bash
 # Solo ejecuta start.py de nuevo (instala lo que falta):
 python start.py
 ```
 
-### ❌ **"Error de permisos en Linux"**
+### "Error de permisos en Linux"
+
 ```bash
-# start.py ya usa --break-system-packages automáticamente
+# start.py ya usa --break-system-packages automaticamente segun tu distro
 python3 start.py
 ```
 
-### ❌ **"Error de permisos en Windows"**
+### "Error de permisos en Windows"
+
 ```bash
-# Usa el archivo creado automáticamente:
+# Usa el archivo creado automaticamente:
 XONIDIP_ADMIN.bat   # Ejecutar como administrador
 ```
 
-### ❌ **"Puerto 5000 en uso"**
+### "Puerto 5000 en uso"
+
 ```bash
-# Abre xonidip.py y cambia el puerto (línea final):
+# Abre xonidip.py y cambia el puerto (linea final):
 app.run(port=5001)
 
 # Luego ve a: http://localhost:5001
 ```
 
-### ❌ **"No se ven las tildes"**
-**SOLUCIÓN:** Guarda tu archivo de nombres en UTF-8 (el bloc de notas ya lo hace por defecto)
+### "No se ven las tildes"
 
-## 📞 **¿NECESITAS AYUDA?**
+**Solucion:** Guarda tu archivo de nombres en UTF-8 (el bloc de notas ya lo hace por defecto)
 
-- 📸 **Instagram:** [@xonidu](https://instagram.com/xonidu)
-- 📧 **Email:** xonidu@gmail.com
-- 💻 **GitHub:** [XONIDU/xonidip](https://github.com/XONIDU/xonidip)
+## Contacto y soporte
 
-## ✅ **LO QUE PUEDES HACER (Y LO QUE NO)**
+- Instagram: [@xonidu](https://instagram.com/xonidu)
+- Email: xonidu@gmail.com
+- GitHub: [XONIDU/xonidip](https://github.com/XONIDU/xonidip)
 
-| ✅ SÍ | ❌ NO |
-|-------|-------|
+## Lo que puedes hacer (y lo que no)
+
+| Si | No |
+|----|----|
 | Generar diplomas para tu curso | Crear documentos falsos |
 | Aprender a automatizar | Usarlo sin permiso |
 | Probar con nombres inventados | Vender los diplomas |
-| Compartir el código | Quitar los créditos |
-| Modificar para prácticas educativas | Usar para documentos oficiales |
+| Compartir el codigo | Quitar los creditos |
+| Modificar para practicas educativas | Usar para documentos oficiales |
 
-## 📋 **NOTAS IMPORTANTES**
+## Notas importantes
 
-- ✅ Funciona en **Windows, Linux y Mac** con Python 3.8+
-- ✅ Soporta **tildes y caracteres especiales** (á, é, í, ó, ú, ñ)
-- ✅ Puedes usar **Excel, CSV o TXT** para los nombres
-- ✅ Los diplomas se generan en **PNG, PDF o JPG**
-- ✅ Cada archivo incluye el **nombre del participante**
-- ✅ El navegador se **abre automáticamente** al iniciar
-- ✅ En Windows, se crean archivos `.bat` para fácil ejecución
+- Funciona en Windows, Linux y Mac con Python 3.8+
+- Soporta tildes y caracteres especiales (a, e, i, o, u, n)
+- Puedes usar Excel, CSV o TXT para los nombres
+- Los diplomas se generan en PNG, PDF o JPG
+- Cada archivo incluye el nombre del participante
+- El navegador se abre automaticamente al iniciar
+- En Windows, se crean archivos .bat para facil ejecucion (normal y con admin)
 
-## 🎉 **¡LISTO!**
+## Listo
 
 ```
 ╔════════════════════════════════════╗
-║   XONIDIP 2026 - Hecho con ❤️      ║
+║   XONIDIP 2026 - Hecho con amor    ║
 ║   por Darian Alberto Camacho Salas ║
 ╚════════════════════════════════════╝
 ```
 
 ---
 
-⭐ **¿Te sirvió?** Dale estrella en GitHub  
-🐛 **¿Encontraste un error?** Abre un "Issue"  
-📢 **¿Sugerencias?** Escríbeme por Instagram
+Si te sirvio, dale estrella en GitHub.  
+Si encontraste un error, abre un Issue.  
+Si tienes sugerencias, escribeme por Instagram.
 
----
+**XONIDU** - Ensenando automatizacion, construyendo conocimiento
 
-**XONIDU** - Enseñando automatización, construyendo conocimiento
