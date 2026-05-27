@@ -53,6 +53,26 @@ Si tienes problemas de permisos, el script crea automaticamente:
 python3 start.py
 ```
 
+
+### Opción 2 – Comando `xoninstall` (recomendado para futuras herramientas XONI)
+
+Agrega la siguiente función a tu `~/.bashrc` con un solo comando:
+
+```bash
+echo 'xoninstall() { if [ -z "$1" ]; then echo "Uso: xoninstall <repo>"; echo "Ej: xoninstall xoniran"; else git clone "https://github>
+```
+
+Luego simplemente escribe:
+
+```bash
+xoninstall xonidip
+cd xonidip
+pip install -r requisitos.txt
+python start.py
+```
+
+> **Nota:** Esta función te servirá para instalar cualquier otra herramienta futura de XONIDU (por ejemplo `xoninstall xonidip`).
+
 ### macOS
 
 ```bash
