@@ -699,10 +699,6 @@ if __name__ == '__main__':
     print(f"\n🌐 ACCESO DESDE CUALQUIER DISPOSITIVO:")
     print(f"   • {server_url}")
     
-    # Iniciar hilo para abrir el navegador automáticamente
-    browser_thread = threading.Thread(target=open_browser_after_delay)
-    browser_thread.daemon = True
-    browser_thread.start()
     
     try:
         qr_ascii = qrcode.QRCode()
