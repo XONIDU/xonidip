@@ -694,16 +694,16 @@ if __name__ == '__main__':
         print(f"\n📁 Carpeta 'fonts' creada en: {os.path.abspath(fonts_folder)}")
         print("💡 Copia archivos .ttf a esta carpeta para más opciones de fuentes")
     
-    print("\n🔍 Verificando fuentes disponibles...")
+    print("\nVerificando fuentes disponibles...")
     
-    print(f"\n🌐 ACCESO DESDE CUALQUIER DISPOSITIVO:")
+    print(f"\nACCESO DESDE CUALQUIER DISPOSITIVO:")
     print(f"   • {server_url}")
     
     
     try:
         qr_ascii = qrcode.QRCode()
         qr_ascii.add_data(server_url)
-        print("\n📱 Escanea este código QR desde tu teléfono:")
+        print("\nEscanea este código QR desde tu teléfono:")
         print("-" * 50)
         qr_ascii.print_ascii()
         print("-" * 50)
