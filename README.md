@@ -1,6 +1,5 @@
 # XONIDIP 2026 - Generador de Diplomas v4.3.0
 
-**Desarrollado por:** Darian Alberto Camacho Salas  
 **Organización:** XONIDU
 
 ## ADVERTENCIA
@@ -236,15 +235,6 @@ app.run(port=5001)
 - Multiples estrategias de instalacion (hasta 7 metodos diferentes)
 
 ## Listo
-
-```
-╔════════════════════════════════════╗
-║   XONIDIP 2026 - Hecho con amor    ║
-║   por Darian Alberto Camacho Salas ║
-╚════════════════════════════════════╝
-```
-
----
 
 Si te sirvio, dale estrella en GitHub.  
 Si encontraste un error, abre un Issue.  
